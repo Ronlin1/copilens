@@ -1,0 +1,30 @@
+typer>=0.9.0
+rich>=13.0.0
+GitPython>=3.1.40
+radon>=6.0.1
+pandas>=2.0.0
+numpy>=1.24.0
+pydantic>=2.0.0
+pytest>=7.4.0
+textual>=0.41.0
+
+# AI Integration
+google-generativeai>=0.3.0  # Legacy API
+google-genai>=0.1.0  # NEW: Gemini 3 with thinking + Google Search
+openai>=1.0.0
+anthropic>=0.8.0
+
+# Deployment SDKs
+docker>=7.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Monitoring & Notifications
+slack-sdk>=3.23.0
+discord-webhook>=1.3.0
+psutil>=5.9.0
+
+# Code Analysis & Transformation
+jinja2>=3.1.0
+pyyaml>=6.0.0
+toml>=0.10.0

@@ -1,0 +1,171 @@
+COPILENS CLI – Technical Documentation
+
+AI Transparency & Code Intelligence Tool (Python + Rich UI)
+
+============================================================ 1. PROJECT
+OVERVIEW ============================================================
+
+Copilens CLI is a Python-based terminal intelligence tool that tracks,
+analyzes, and explains AI-generated code changes in Git repositories.
+
+It provides: - AI contribution tracking - Complexity analysis - Risk
+scoring - AI fingerprint detection - Interactive terminal chat mode -
+Trend tracking over time - Exportable reports
+
+The tool is designed to integrate seamlessly with Git workflows and
+provide deep insights into AI-assisted development.
+
+============================================================ 2. SYSTEM
+ARCHITECTURE
+============================================================
+
+                ┌─────────────────────┐
+                │  Git Repository     │
+                └──────────┬──────────┘
+                           │
+                     Git Diff Parsing
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+
+AI Detection Metrics Engine Risk Analyzer │ │ │
+└──────────────┬───┴───────┬──────────┘ │ │ Explanation Engine │ │ │
+Terminal Chat Mode │ │ │ Rich CLI UI
+
+============================================================ 3. CORE
+FEATURES ============================================================
+
+PHASE 1 – MVP
+
+1.  Git Diff Analyzer
+    -   Parses git diff output
+    -   Detects added/deleted lines
+    -   Identifies large AI-like insertions
+2.  AI Contribution Metrics
+    -   % AI-generated lines
+    -   AI vs Human ratio
+    -   File-level AI density
+3.  Complexity Analyzer
+    -   Cyclomatic complexity using radon
+    -   Complexity delta tracking
+4.  Risk Score Engine
+    -   Complexity increase detection
+    -   Large logic injection alerts
+    -   Security-sensitive file detection
+    -   Missing test coverage warnings
+5.  Terminal Dashboard (Rich UI)
+    -   Live metrics display
+    -   Risk indicators
+    -   Trend arrows
+    -   File breakdown tables
+
+PHASE 2 – ADVANCED FEATURES
+
+6.  Chat Mode (Agentic Interaction)
+    -   Explain AI changes per file
+    -   Risk explanation
+    -   Refactoring suggestions
+    -   Simplification of generated code
+7.  AI Fingerprint Detection
+    -   Pattern repetition scoring
+    -   Boilerplate density analysis
+    -   Naming entropy scoring
+8.  PR Analysis Mode
+    -   AI density per PR
+    -   Business logic summary
+    -   Breaking change warnings
+9.  Trend Tracking
+    -   AI usage growth
+    -   Complexity growth
+    -   Risk evolution timeline
+10. AI Trust Index
+
+-   Composite scoring system
+-   Scored 0–100
+-   Based on risk, complexity, and security
+
+============================================================ 4. PYTHON
+STACK ============================================================
+
+CLI Framework: - typer
+
+Terminal UI: - rich - textual (optional advanced UI)
+
+Git Interaction: - GitPython - subprocess
+
+Code Analysis: - radon - ast - libcst (optional advanced parsing)
+
+Metrics: - pandas - numpy
+
+Config & Validation: - pydantic
+
+Testing: - pytest
+
+============================================================ 5. RICH UI
+DESIGN EXAMPLE
+============================================================
+
+Below is an example of how the Rich UI dashboard would look:
+
+------------------------------------------------------------------------
+
+╭──────────────────── Copilens ────────────────────╮ │ │ │ AI
+Contribution ██████░░░ 43% │ │ Risk Score ███░░░░░░ 3.2 / 5 │ │
+Complexity Δ ↑ +14% │ │ Files Impacted 7 │ │ │
+╰───────────────────────────────────────────────────╯
+
+Table Example:
+
+┌───────────────┬────────────┬────────────┬─────────┐ │ File │ AI % │
+Complexity │ Risk │
+├───────────────┼────────────┼────────────┼─────────┤ │ auth.py │ 68% │
++3 │ High │ │ utils.py │ 22% │ 0 │ Low │ │ service.py │ 54% │ +2 │
+Medium │ └───────────────┴────────────┴────────────┴─────────┘
+
+Example Rich Code Snippet:
+
+from rich.console import Console from rich.panel import Panel from
+rich.table import Table
+
+console = Console()
+
+def show_dashboard(): table = Table(title=“Copilens Metrics”)
+table.add_column(“Metric”, style=“cyan”) table.add_column(“Value”,
+style=“magenta”)
+
+    table.add_row("AI Contribution", "43%")
+    table.add_row("Risk Score", "3.2 / 5")
+    table.add_row("Complexity Delta", "+14%")
+
+    console.print(Panel(table, title="Copilens CLI"))
+
+============================================================ 6. CLI
+COMMAND DESIGN
+============================================================
+
+copilens init copilens stats copilens diff copilens risk copilens
+explain copilens explain-pr copilens chat copilens trend copilens export
+
+============================================================ 7.
+DIFFERENTIATORS
+============================================================
+
+-   AI analyzing AI-generated code
+-   Terminal-native intelligence layer
+-   Risk-first architecture
+-   Developer transparency tooling
+-   Enterprise-ready metrics
+-   Git-native workflow integration
+
+============================================================ 8. FUTURE
+EXPANSION ============================================================
+
+-   GitHub Actions integration
+-   VS Code companion extension
+-   Team-wide AI impact analytics
+-   Multi-AI support
+-   Security vulnerability scanning
+-   SaaS dashboard companion
+
+============================================================ END OF
+DOCUMENT ============================================================
