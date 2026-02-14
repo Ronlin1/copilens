@@ -8,7 +8,7 @@ export default function ChatWindow({ isOpen, onClose }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hello! I\'m your Copilens AI assistant powered by Gemini. I can help you analyze your repository, explain code, and answer questions. How can I help you today?'
+      content: 'Hello! I\'m your Copilens AI assistant powered by Gemini 3. Analyze a repository first, then I can help you understand the code, detect AI-generated patterns, and answer technical questions. How can I help you today?'
     }
   ]);
   const [input, setInput] = useState('');
@@ -36,18 +36,21 @@ export default function ChatWindow({ isOpen, onClose }) {
 
     try {
       // Get repository context from localStorage
-      const repoUrl = localStorage.getItem('currentRepo');
       const analysisData = localStorage.getItem('analysisData');
       let repoContext = null;
 
-      if (repoUrl && analysisData) {
+      if (analysisData) {
         const data = JSON.parse(analysisData);
         repoContext = {
-          url: repoUrl,
-          files: data.filesChanged,
-          languages: data.languages,
-          commits: data.totalCommits,
-          fileTree: data.files
+          url: data.repoUrl,
+          name: data.repoName,
+          description: data.description,
+          languages: data.languages.map(l => l.name).join(', '),
+          totalCommits: data.totalCommits,
+          contributors: data.totalContributors,
+          aiDetection: data.aiAnalysis?.aiDetection?.percentage || 0,
+          codeQuality: data.aiAnalysis?.codeQuality?.score || 0,
+          analysis: data.aiAnalysis
         };
       }
 
@@ -67,7 +70,7 @@ export default function ChatWindow({ isOpen, onClose }) {
       setError(error.message);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `⚠️ ${error.message}\n\nPlease make sure you've added your Gemini API key to the .env file.`
+        content: `⚠️ ${error.message}\n\nPlease make sure you've analyzed a repository first and that your Gemini API key is configured.`
       }]);
       setIsLoading(false);
     }
