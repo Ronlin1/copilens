@@ -33,45 +33,52 @@ export default function CommitTimeline({ data }) {
       </div>
 
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data}>
+        <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 60 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
           <XAxis 
             dataKey="displayDate" 
             stroke="#9ca3af"
-            tick={{ fill: '#9ca3af', fontSize: 12 }}
+            tick={{ fill: '#9ca3af', fontSize: 11 }}
             angle={-45}
             textAnchor="end"
             height={80}
+            interval="preserveStartEnd"
           />
           <YAxis 
             stroke="#9ca3af"
             tick={{ fill: '#9ca3af' }}
+            allowDecimals={false}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: 'rgba(17, 24, 39, 0.9)',
+              backgroundColor: 'rgba(17, 24, 39, 0.95)',
               border: '1px solid rgba(59, 130, 246, 0.5)',
               borderRadius: '8px',
-              color: '#fff'
+              color: '#fff',
+              padding: '12px'
             }}
+            labelStyle={{ fontWeight: 'bold', marginBottom: '8px' }}
           />
-          <Legend />
+          <Legend 
+            wrapperStyle={{ paddingTop: '20px' }}
+            iconType="circle"
+          />
           <Line
             type="monotone"
             dataKey="count"
             stroke="#3b82f6"
-            strokeWidth={3}
-            dot={{ fill: '#3b82f6', r: 5 }}
-            activeDot={{ r: 8 }}
+            strokeWidth={2}
+            dot={{ fill: '#3b82f6', r: 4, strokeWidth: 2, stroke: '#fff' }}
+            activeDot={{ r: 6, strokeWidth: 2 }}
             name="Total Commits"
           />
           <Line
             type="monotone"
             dataKey="aiDetected"
             stroke="#a855f7"
-            strokeWidth={3}
-            dot={{ fill: '#a855f7', r: 5 }}
-            activeDot={{ r: 8 }}
+            strokeWidth={2}
+            dot={{ fill: '#a855f7', r: 4, strokeWidth: 2, stroke: '#fff' }}
+            activeDot={{ r: 6, strokeWidth: 2 }}
             name="AI Detected"
           />
         </LineChart>

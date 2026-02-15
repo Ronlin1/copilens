@@ -190,37 +190,66 @@ export default function Dashboard() {
       }));
       
       // Build commit timeline with ACCURATE AI detection and actual dates
-      const commitsByDate = {};
+      // Group by week for better visualization (avoids too many dots)
+      const commitsByWeek = {};
       const aiPercentage = aiAnalysis?.aiDetection?.percentage || 0;
+      
+      // Helper to get week key (YYYY-WW format)
+      const getWeekKey = (date) => {
+        const d = new Date(date);
+        const yearStart = new Date(d.getFullYear(), 0, 1);
+        const weekNum = Math.ceil(((d - yearStart) / 86400000 + yearStart.getDay() + 1) / 7);
+        return `${d.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+      };
+      
+      const getWeekDisplay = (weekKey) => {
+        const [year, week] = weekKey.split('-W');
+        const weekNum = parseInt(week);
+        return `Week ${weekNum}, ${year}`;
+      };
       
       githubData.commits.forEach((commit, index) => {
         const date = new Date(commit.commit.author.date);
-        const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+        const weekKey = getWeekKey(date);
         
-        if (!commitsByDate[dateKey]) {
-          commitsByDate[dateKey] = { 
-            date: dateKey, 
-            displayDate: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        if (!commitsByWeek[weekKey]) {
+          commitsByWeek[weekKey] = { 
+            week: weekKey,
+            displayDate: getWeekDisplay(weekKey),
             count: 0, 
-            aiDetected: 0 
+            aiDetected: 0,
+            startDate: date
           };
         }
-        commitsByDate[dateKey].count++;
+        commitsByWeek[weekKey].count++;
         
         // Distribute AI-detected commits proportionally based on Gemini analysis
         if (index < githubData.commits.length * (aiPercentage / 100)) {
-          commitsByDate[dateKey].aiDetected++;
+          commitsByWeek[weekKey].aiDetected++;
+        }
+        
+        // Keep track of earliest date in week
+        if (date < commitsByWeek[weekKey].startDate) {
+          commitsByWeek[weekKey].startDate = date;
         }
       });
       
-      const timelineData = Object.values(commitsByDate).sort((a, b) => 
-        a.date.localeCompare(b.date)
+      // Convert to array and sort by week
+      let timelineData = Object.values(commitsByWeek).sort((a, b) => 
+        a.startDate - b.startDate
       );
+      
+      // Limit to last 52 weeks (1 year) for cleaner visualization
+      if (timelineData.length > 52) {
+        console.log(`📊 Limiting timeline to last 52 weeks (from ${timelineData.length} total)`);
+        timelineData = timelineData.slice(-52);
+      }
       
       // Calculate total AI detected commits for accuracy
       const totalAIDetected = Math.round(githubData.stats.totalCommits * (aiPercentage / 100));
       const timelineAITotal = timelineData.reduce((sum, t) => sum + t.aiDetected, 0);
       console.log(`✅ AI Detection Accuracy: ${timelineAITotal}/${totalAIDetected} commits (${aiPercentage}%)`);
+      console.log(`📅 Timeline showing ${timelineData.length} weeks of activity`);
       
       // Build file tree structure with LINE COUNTS
       const buildFileTree = (files) => {
