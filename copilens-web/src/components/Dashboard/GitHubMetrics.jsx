@@ -2,7 +2,12 @@ import { motion } from 'framer-motion';
 import { GitPullRequest, AlertCircle, Tag, Star, GitFork, Eye } from 'lucide-react';
 
 export default function GitHubMetrics({ stats, repoInfo }) {
-  if (!stats || !repoInfo) return null;
+  console.log('📊 GitHubMetrics received:', { stats, repoInfo });
+  
+  if (!stats || !repoInfo) {
+    console.warn('⚠️ GitHubMetrics missing data:', { stats, repoInfo });
+    return null;
+  }
 
   const metrics = [
     {

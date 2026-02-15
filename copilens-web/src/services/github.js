@@ -50,6 +50,13 @@ class GitHubService {
     const response = await axios.get(`${this.baseURL}/repos/${owner}/${repo}`, {
       headers: this.headers
     });
+    console.log('📦 RepoInfo fetched:', {
+      name: response.data.name,
+      stars: response.data.stargazers_count,
+      forks: response.data.forks_count,
+      watchers: response.data.subscribers_count,
+      openIssues: response.data.open_issues_count
+    });
     return response.data;
   }
 
@@ -538,10 +545,10 @@ class GitHubService {
         totalSize: tree.reduce((sum, item) => sum + (item.size || 0), 0),
         
         // Repository info (from repoInfo object)
-        stars: repoInfo.stargazers_count,
-        forks: repoInfo.forks_count,
-        watchers: repoInfo.subscribers_count, // CORRECT field for watchers!
-        openIssues: repoInfo.open_issues_count,
+        stars: repoInfo?.stargazers_count || 0,
+        forks: repoInfo?.forks_count || 0,
+        watchers: repoInfo?.subscribers_count || 0, // CORRECT field for watchers!
+        openIssues: repoInfo?.open_issues_count || 0,
         
         // Pull requests (ACTUAL from pagination)
         totalPRs: pullRequests.length, // ACTUAL count
@@ -576,6 +583,18 @@ class GitHubService {
         topics: repoInfo.topics || []
       }
     };
+    
+    // Debug logging
+    console.log('📊 GitHub Stats Created:', {
+      stars: returnData.stats.stars,
+      forks: returnData.stats.forks,
+      watchers: returnData.stats.watchers,
+      totalPRs: returnData.stats.totalPRs,
+      totalIssues: returnData.stats.totalIssues,
+      totalReleases: returnData.stats.totalReleases
+    });
+    
+    return returnData;
   }
 
   buildFileTree(files) {
