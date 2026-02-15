@@ -31,9 +31,15 @@ function FileTreeItem({ item, level = 0 }) {
           {item.name}
         </span>
 
+        {item.lines > 0 && (
+          <span className="text-sm text-blue-600 dark:text-blue-400 font-semibold mr-2">
+            {item.lines.toLocaleString()} lines
+          </span>
+        )}
+
         {item.size && (
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            {item.size}
+            {(item.size / 1024).toFixed(1)} KB
           </span>
         )}
       </motion.div>
