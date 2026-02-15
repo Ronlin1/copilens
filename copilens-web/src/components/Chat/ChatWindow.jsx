@@ -8,7 +8,7 @@ export default function ChatWindow({ isOpen, onClose }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hello! I\'m your Copilens AI assistant powered by Gemini 3. Analyze a repository first, then I can help you understand the code, detect AI-generated patterns, and answer technical questions. How can I help you today?'
+      content: 'Hello! I am your Copilens AI assistant powered by Gemini 3. Analyze a repository first, then I can help you understand the code, detect AI-generated patterns, discuss deployment options, and answer technical questions. How can I help you today?'
     }
   ]);
   const [input, setInput] = useState('');
@@ -36,11 +36,11 @@ export default function ChatWindow({ isOpen, onClose }) {
 
     try {
       // Get repository context from localStorage
-      const analysisData = localStorage.getItem('analysisData');
+      const sessionData = localStorage.getItem('copilens_session');
       let repoContext = null;
 
-      if (analysisData) {
-        const data = JSON.parse(analysisData);
+      if (sessionData) {
+        const data = JSON.parse(sessionData);
         repoContext = {
           url: data.repoUrl,
           name: data.repoName,
@@ -50,7 +50,10 @@ export default function ChatWindow({ isOpen, onClose }) {
           contributors: data.totalContributors,
           aiDetection: data.aiAnalysis?.aiDetection?.percentage || 0,
           codeQuality: data.aiAnalysis?.codeQuality?.score || 0,
-          analysis: data.aiAnalysis
+          analysis: data.aiAnalysis,
+          complexityData: data.complexityData,
+          deploymentOptions: data.deploymentOptions,
+          recommendedPlatform: data.recommendedPlatform
         };
       }
 

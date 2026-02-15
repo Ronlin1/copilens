@@ -1,7 +1,7 @@
 import { useState, lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon, Sparkles, BarChart3, Rocket, Home, Terminal, Menu, X, Zap } from 'lucide-react';
+import { Sun, Moon, Sparkles, BarChart3, Rocket, Home, Terminal, Menu, X, Zap, Info } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import { ENV } from './config/env';
@@ -10,6 +10,7 @@ import { ENV } from './config/env';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const CLIPage = lazy(() => import('./pages/CLIPage'));
 const DeployPage = lazy(() => import('./pages/DeployPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const FloatingChatButton = lazy(() => import('./components/Chat/FloatingChatButton'));
 
@@ -189,6 +190,7 @@ function Navigation() {
     { to: '/dashboard', label: 'Dashboard', icon: BarChart3 },
     { to: '/deploy', label: 'Deploy', icon: Rocket },
     { to: '/cli', label: 'CLI', icon: Terminal },
+    { to: '/about', label: 'About', icon: Info },
   ];
 
   return (
@@ -286,6 +288,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/deploy" element={<DeployPage />} />
                 <Route path="/cli" element={<CLIPage />} />
+                <Route path="/about" element={<AboutPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

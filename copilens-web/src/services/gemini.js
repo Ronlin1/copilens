@@ -228,21 +228,40 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting or additional text.`;
       this.initialize();
     }
 
-    let systemPrompt = 'You are Copilens AI, an expert code analysis assistant helping developers understand repositories, detect AI-generated code, and provide technical insights.';
+    let systemPrompt = `You are Copilens AI, a friendly and knowledgeable code analysis assistant. Your responses should be conversational, clear, and natural - like talking to a helpful colleague.
+
+IMPORTANT RESPONSE STYLE:
+- Write in natural, flowing prose without markdown formatting
+- Do NOT use asterisks (**bold**, *italic*), underscores, or other markdown syntax
+- Do NOT use bullet points, numbered lists, or special formatting
+- Use plain text only - write complete sentences and paragraphs
+- Be conversational and warm in tone, like explaining to a friend
+- When mentioning code, just describe it naturally in sentences
+- Keep responses concise but informative (2-4 sentences unless detailed explanation needed)
+
+Your role is to help developers understand their repositories, detect patterns, provide insights, and answer technical questions about the codebase.`;
     
     if (repoContext) {
-      systemPrompt += `\n\nCurrent Repository Context:\n`;
-      systemPrompt += `- URL: ${repoContext.url}\n`;
-      systemPrompt += `- Name: ${repoContext.name}\n`;
-      systemPrompt += `- Description: ${repoContext.description}\n`;
-      systemPrompt += `- Languages: ${repoContext.languages}\n`;
-      systemPrompt += `- Total Commits: ${repoContext.totalCommits}\n`;
-      systemPrompt += `- Contributors: ${repoContext.contributors}\n`;
-      systemPrompt += `- AI Detection: ${repoContext.aiDetection}% AI-generated code\n`;
-      systemPrompt += `- Code Quality: ${repoContext.codeQuality}/10\n`;
+      systemPrompt += `\n\nYou have analyzed this repository:\n`;
+      systemPrompt += `Repository: ${repoContext.name}\n`;
+      systemPrompt += `Description: ${repoContext.description}\n`;
+      systemPrompt += `Primary Languages: ${repoContext.languages}\n`;
+      systemPrompt += `Total Commits: ${repoContext.totalCommits}\n`;
+      systemPrompt += `Contributors: ${repoContext.contributors}\n`;
+      systemPrompt += `AI Detection: ${repoContext.aiDetection}% of code appears to be AI-generated\n`;
+      systemPrompt += `Code Quality Score: ${repoContext.codeQuality}/10\n`;
       
       if (repoContext.analysis) {
-        systemPrompt += `\nDetailed Analysis:\n${JSON.stringify(repoContext.analysis, null, 2)}`;
+        systemPrompt += `\nYou have access to detailed code analysis including complexity metrics, architecture patterns, and risk assessments. Use this information to provide specific, actionable insights when asked.`;
+      }
+      
+      if (repoContext.deploymentOptions) {
+        const availablePlatforms = Object.entries(repoContext.deploymentOptions)
+          .filter(([_, config]) => config.available)
+          .map(([platform]) => platform);
+        if (availablePlatforms.length > 0) {
+          systemPrompt += `\n\nDeployment configurations detected: ${availablePlatforms.join(', ')}. You can discuss deployment options if asked.`;
+        }
       }
     }
 
@@ -253,7 +272,7 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting or additional text.`;
 
     const contents = [
       { role: 'user', parts: [{ text: systemPrompt }] },
-      { role: 'model', parts: [{ text: 'Understood. I have full context of the repository. Ready to assist with detailed insights and answers.' }] },
+      { role: 'model', parts: [{ text: 'I understand. I have the complete repository context and I will provide helpful, conversational responses without any markdown formatting. What would you like to know about the codebase?' }] },
       ...conversationHistory
     ];
 

@@ -17,6 +17,7 @@ import githubService from '../services/github';
 import geminiService from '../services/gemini';
 import { analyzeRepositoryComplexity } from '../utils/complexity';
 import { analyzeSystemStructure, generateSystemsInsights } from '../utils/systemsThinking';
+import { detectDeploymentOptions, getRecommendedPlatform } from '../utils/deploymentDetection';
 
 export default function Dashboard() {
   const [searchParams] = useSearchParams();
@@ -122,6 +123,33 @@ export default function Dashboard() {
       console.log('💡 Generating systems thinking insights...');
       const systemsInsights = generateSystemsInsights(githubData, complexityData);
       console.log(`✅ Generated ${systemsInsights.length} insights`);
+      
+      // Detect deployment configurations
+      console.log('🚀 Detecting deployment configurations...');
+      const packageJsonFile = githubData.fileContents.find(f => 
+        f.path.toLowerCase() === 'package.json'
+      );
+      let packageJson = null;
+      if (packageJsonFile) {
+        try {
+          packageJson = JSON.parse(packageJsonFile.content);
+        } catch (e) {
+          console.warn('Could not parse package.json');
+        }
+      }
+      
+      const deploymentOptions = detectDeploymentOptions(
+        githubData.tree,
+        githubData.fileContents,
+        githubData.languages,
+        packageJson
+      );
+      const recommendedPlatform = getRecommendedPlatform(deploymentOptions, githubData.languages);
+      console.log(`✅ Deployment detection complete. Recommended: ${recommendedPlatform}`);
+      console.log('   Available platforms:', Object.entries(deploymentOptions)
+        .filter(([_, config]) => config.available)
+        .map(([platform]) => platform)
+        .join(', ') || 'None detected');
       
       // Analyze high-risk files with Gemini Pro
       let highRiskAnalysis = null;
@@ -333,6 +361,8 @@ export default function Dashboard() {
         systemsAnalysis,
         systemsInsights,
         highRiskAnalysis, // Add Gemini Pro analysis of high-risk files
+        deploymentOptions, // Add deployment configuration detection
+        recommendedPlatform, // Add recommended deployment platform
         
         // GitHub-specific stats
         githubStats: githubData.stats,
@@ -364,6 +394,25 @@ export default function Dashboard() {
 
       setData(finalData);
       setSystemsAnalysis(systemsAnalysis);
+      
+      // Save to localStorage for cross-component access (chatbot, deploy page)
+      const sessionData = {
+        repoUrl: url,
+        repoName: githubData.repoInfo?.name || 'Unknown',
+        description: githubData.repoInfo?.description || '',
+        languages: languageChartData,
+        rawLanguages: githubData.languages,
+        totalCommits: finalData.totalCommits,
+        totalContributors: finalData.contributors,
+        aiAnalysis: aiAnalysis,
+        complexityData: complexityData,
+        deploymentOptions: deploymentOptions,
+        recommendedPlatform: recommendedPlatform,
+        fileTree: fileTreeStructure,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('copilens_session', JSON.stringify(sessionData));
+      console.log('💾 Session data saved to localStorage');
       
       // Generate recommendations
       const recs = [
