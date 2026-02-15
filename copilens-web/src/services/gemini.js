@@ -325,6 +325,335 @@ Make it professional and suitable for technical documentation.`;
       };
     }
   }
+
+  async generateArchitectureDoc(repoData) {
+    try {
+      console.log('🎨 Generating architecture diagram with Gemini Image...');
+      
+      if (!this.ai) {
+        this.initialize();
+      }
+
+      // Get detailed repo info
+      const languages = Array.isArray(repoData.languages) 
+        ? repoData.languages.slice(0, 5).map(l => l.name).join(', ')
+        : Object.keys(repoData.languages || {}).slice(0, 5).join(', ');
+      
+      const repoName = repoData.repoInfo?.name || 'Application';
+      const description = repoData.repoInfo?.description || 'No description';
+      const stars = repoData.repoInfo?.stargazers_count || 0;
+      const fileCount = repoData.tree?.length || 0;
+
+      // Extract key architecture files
+      const keyFiles = repoData.tree?.slice(0, 50)
+        .map(f => f.path || f)
+        .filter(path => 
+          path.includes('config') || 
+          path.includes('server') || 
+          path.includes('api') || 
+          path.includes('database') ||
+          path.includes('service') ||
+          path.includes('controller') ||
+          path.includes('model') ||
+          path.includes('router') ||
+          path.includes('index') ||
+          path.includes('main') ||
+          path.includes('app')
+        ) || [];
+
+      // Create detailed architecture diagram prompt
+      const imagePrompt = `Generate a professional, detailed software architecture diagram for the "${repoName}" repository.
+
+**Repository Information:**
+- Name: ${repoName}
+- Description: ${description}
+- Primary Technologies: ${languages}
+- Total Files: ${fileCount}
+- GitHub Stars: ${stars}
+
+**Key Architecture Files Detected:**
+${keyFiles.slice(0, 20).join('\n') || 'Standard project structure'}
+
+**Diagram Requirements:**
+
+Create a modern, professional technical architecture diagram that shows:
+
+1. **SYSTEM LAYERS** (show these as distinct horizontal layers):
+   - Presentation Layer (UI/Frontend)
+   - Application Layer (Business Logic)
+   - Data Layer (Database/Storage)
+   - External Services (APIs, Third-party integrations)
+
+2. **COMPONENT BREAKDOWN**:
+   - Frontend components and frameworks (${languages.split(',')[0] || 'main tech'})
+   - Backend services and APIs
+   - Database systems
+   - Authentication & Authorization modules
+   - External integrations
+
+3. **DATA FLOW**:
+   - Show arrows indicating request/response flow
+   - Show data movement between components
+   - Indicate synchronous vs asynchronous communication
+
+4. **TECHNOLOGY STACK**:
+   - Label each component with the technology used
+   - Show frameworks, libraries, and tools
+   - Include deployment/infrastructure elements
+
+5. **VISUAL STYLE**:
+   - Use a clean, modern technical diagram aesthetic (like AWS or Azure architecture diagrams)
+   - Professional color scheme: blues (#3B82F6), purples (#8B5CF6), greens (#10B981), oranges (#F59E0B)
+   - Clear component boxes with rounded corners
+   - Distinct layers with different background shades
+   - Bold, readable labels and text
+   - Directional arrows showing flow
+   - Icons or symbols for different component types
+   - Grid-based layout for alignment
+
+6. **QUALITY**:
+   - High resolution, crisp and clear
+   - Well-organized and balanced layout
+   - Professional presentation quality
+   - Suitable for technical documentation
+
+Make it look like a professional architecture diagram from a technical design document. The diagram should be comprehensive, visually appealing, and technically accurate based on the repository structure and technologies used.`;
+
+      console.log('📤 Requesting architecture diagram from Gemini...');
+      
+      const tools = [
+        {
+          googleSearch: {}
+        }
+      ];
+
+      const config = {
+        imageConfig: {
+          aspectRatio: "16:9",
+          imageSize: "1K",
+        },
+        responseModalities: ['IMAGE', 'TEXT'],
+        tools,
+      };
+
+      const contents = [
+        {
+          role: 'user',
+          parts: [{ text: imagePrompt }],
+        },
+      ];
+
+      const response = await this.ai.models.generateContentStream({
+        model: 'gemini-3-pro-image-preview',
+        config,
+        contents,
+      });
+
+      console.log('📥 Processing response stream...');
+      
+      let imageData = null;
+      let mimeType = null;
+      let textContent = '';
+
+      for await (const chunk of response) {
+        if (!chunk.candidates || !chunk.candidates[0]?.content || !chunk.candidates[0]?.content?.parts) {
+          continue;
+        }
+        
+        // Check for inline image data
+        if (chunk.candidates[0].content.parts[0]?.inlineData) {
+          const inlineData = chunk.candidates[0].content.parts[0].inlineData;
+          imageData = inlineData.data;
+          mimeType = inlineData.mimeType || 'image/png';
+          console.log('📷 Image data received:', mimeType);
+        } else if (chunk.text) {
+          textContent += chunk.text;
+          console.log('💬 Text chunk received');
+        }
+      }
+
+      if (imageData) {
+        console.log('✅ Architecture diagram image generated successfully');
+        
+        // Also generate text analysis in parallel
+        console.log('📝 Generating text analysis...');
+        let textData = textContent; // Use any text from image response
+        
+        // If no text came with image, generate separate text analysis
+        if (!textData || textData.trim().length < 100) {
+          try {
+            const languages = Array.isArray(repoData.languages) 
+              ? repoData.languages.slice(0, 5).map(l => l.name).join(', ')
+              : Object.keys(repoData.languages || {}).slice(0, 5).join(', ');
+            
+            const files = repoData.tree?.slice(0, 30).map(f => f.path || f).join('\n') || 'No files';
+
+            const textPrompt = `Analyze this repository's architecture in detail:
+
+**Repository:** ${repoData.repoInfo?.name || 'Unknown'}
+**Description:** ${repoData.repoInfo?.description || 'No description'}
+**Languages:** ${languages}
+**Total Files:** ${repoData.tree?.length || 0}
+
+**Key Files:**
+${files}
+
+Provide a comprehensive architecture analysis covering:
+1. **Architecture Pattern** (MVC, Microservices, Monolith, etc.)
+2. **System Components** (Frontend, Backend, Database, APIs, etc.)
+3. **Technology Stack** (Frameworks, libraries, tools used)
+4. **Data Flow** (How data moves through the system)
+5. **Key Features** (Main capabilities)
+6. **Deployment Strategy** (How it should be deployed)
+
+Make it detailed, professional, and technical. Format in markdown.`;
+
+            const textResponse = await this.ai.models.generateContent({
+              model: this.model,
+              contents: [{ role: 'user', parts: [{ text: textPrompt }] }],
+              config: {
+                temperature: 0.7,
+                maxOutputTokens: 2048,
+              }
+            });
+
+            textData = textResponse.text || textResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          } catch (textError) {
+            console.error('❌ Text generation failed:', textError);
+            textData = `# Architecture Analysis
+
+Image diagram generated successfully. Text analysis generation encountered an error.`;
+          }
+        }
+
+        const imageDataUrl = `data:${mimeType};base64,${imageData}`;
+        return { 
+          imageData: imageDataUrl,
+          textData: textData,
+          type: 'image' 
+        };
+      }
+
+      throw new Error('No image data in response');
+      
+    } catch (error) {
+      console.error('❌ Image generation failed:', error.message);
+      console.log('📝 Falling back to text-based architecture analysis...');
+      
+      // Fallback: Generate text description with Gemini
+      try {
+        if (!this.ai) {
+          this.initialize();
+        }
+
+        const languages = Array.isArray(repoData.languages) 
+          ? repoData.languages.slice(0, 5).map(l => `${l.name}`).join(', ')
+          : Object.keys(repoData.languages || {}).slice(0, 5).join(', ');
+        
+        const files = repoData.tree?.slice(0, 30).map(f => f.path || f).join('\n') || 'No files';
+
+        const prompt = `Analyze this repository's architecture in detail:
+
+**Repository:** ${repoData.repoInfo?.name || 'Unknown'}
+**Description:** ${repoData.repoInfo?.description || 'No description'}
+**Languages:** ${languages}
+**Total Files:** ${repoData.tree?.length || 0}
+
+**Key Files:**
+${files}
+
+Provide a comprehensive architecture analysis covering:
+1. **Architecture Pattern** (MVC, Microservices, Monolith, etc.)
+2. **System Components** (Frontend, Backend, Database, APIs, etc.)
+3. **Technology Stack** (Frameworks, libraries, tools used)
+4. **Data Flow** (How data moves through the system)
+5. **Key Features** (Main capabilities)
+6. **Deployment Strategy** (How it should be deployed)
+
+Make it detailed, professional, and technical. Format in markdown.`;
+
+        const response = await this.ai.models.generateContent({
+          model: this.model,
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          config: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+          }
+        });
+
+        const text = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        
+        if (text && text.trim()) {
+          console.log('✅ Architecture analysis generated (text fallback)');
+          return { 
+            textData: text,
+            imageData: null,
+            type: 'text' 
+          };
+        }
+      } catch (textError) {
+        console.error('❌ Text generation also failed:', textError);
+      }
+      
+      // Final fallback: Return template description
+      const languages = Array.isArray(repoData.languages) 
+        ? repoData.languages.slice(0, 3).map(l => l.name).join(', ')
+        : Object.keys(repoData.languages || {}).slice(0, 3).join(', ');
+      
+      const description = `# Architecture Analysis: ${repoData.repoInfo?.name || 'Application'}
+
+## Technology Stack
+**Languages:** ${languages}
+**Total Files:** ${repoData.tree?.length || 0}
+**Description:** ${repoData.repoInfo?.description || 'No description'}
+
+## System Architecture
+
+### Architecture Pattern
+This appears to be a modern application following industry best practices.
+
+### Key Components
+
+#### 1. Frontend Layer
+- User interface and presentation logic
+- Built with ${languages}
+- Handles user interactions and display
+
+#### 2. Backend Services
+- Business logic and data processing
+- API endpoints for client communication
+- Authentication and authorization
+
+#### 3. Data Layer
+- Database for persistent storage
+- Caching mechanisms for performance
+- File storage and management
+
+### Data Flow
+1. User interacts with the frontend
+2. Frontend sends requests to backend APIs
+3. Backend processes business logic
+4. Data is fetched/stored in the database
+5. Response sent back to frontend
+6. UI updates to reflect changes
+
+### Deployment Recommendations
+- Use containerization (Docker) for consistency
+- Deploy frontend separately from backend
+- Use CI/CD pipeline for automated deployments
+- Implement monitoring and logging
+- Set up load balancing for scalability
+
+---
+*Note: Architecture diagram generation is currently unavailable. This is a text-based analysis based on repository structure.*`;
+      
+      return { 
+        textData: description,
+        imageData: null,
+        type: 'text' 
+      };
+    }
+  }
 }
 
 export default new GeminiService();

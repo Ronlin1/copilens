@@ -4,25 +4,31 @@ import { CheckCircle2, Loader2, Database, GitBranch, GitPullRequest, AlertCircle
 export default function ProgressNotifications({ logs }) {
   // Keep only the last 5 logs
   const recentLogs = logs.slice(-5);
+  
+  console.log('DEBUG ProgressNotifications: Rendering with', logs.length, 'logs, showing', recentLogs.length);
 
-  const getIcon = (message) => {
-    if (message.includes('commit')) return GitCommit;
-    if (message.includes('contributor')) return Users;
-    if (message.includes('branch')) return GitBranch;
-    if (message.includes('pull request') || message.includes('PR')) return GitPullRequest;
-    if (message.includes('issue')) return AlertCircle;
-    if (message.includes('release')) return Tag;
+  const getIcon = (log) => {
+    const message = log.message || '';
+    const type = log.type || '';
+    if (message.includes('commit') || type === 'commits') return GitCommit;
+    if (message.includes('contributor') || type === 'contributors') return Users;
+    if (message.includes('branch') || type === 'branches') return GitBranch;
+    if (message.includes('pull request') || message.includes('PR') || type === 'pull requests') return GitPullRequest;
+    if (message.includes('issue') || type === 'issues') return AlertCircle;
+    if (message.includes('release') || type === 'releases') return Tag;
     if (message.includes('✅') || message.includes('success')) return CheckCircle2;
     return Database;
   };
 
-  const getGradient = (message) => {
-    if (message.includes('commit')) return 'from-blue-500 to-cyan-500';
-    if (message.includes('contributor')) return 'from-purple-500 to-pink-500';
-    if (message.includes('branch')) return 'from-green-500 to-emerald-500';
-    if (message.includes('pull request') || message.includes('PR')) return 'from-orange-500 to-red-500';
-    if (message.includes('issue')) return 'from-red-500 to-pink-500';
-    if (message.includes('release')) return 'from-yellow-500 to-orange-500';
+  const getGradient = (log) => {
+    const message = log.message || '';
+    const type = log.type || '';
+    if (message.includes('commit') || type === 'commits') return 'from-blue-500 to-cyan-500';
+    if (message.includes('contributor') || type === 'contributors') return 'from-purple-500 to-pink-500';
+    if (message.includes('branch') || type === 'branches') return 'from-green-500 to-emerald-500';
+    if (message.includes('pull request') || message.includes('PR') || type === 'pull requests') return 'from-orange-500 to-red-500';
+    if (message.includes('issue') || type === 'issues') return 'from-red-500 to-pink-500';
+    if (message.includes('release') || type === 'releases') return 'from-yellow-500 to-orange-500';
     if (message.includes('✅')) return 'from-green-400 to-emerald-400';
     return 'from-indigo-500 to-purple-500';
   };
@@ -31,9 +37,11 @@ export default function ProgressNotifications({ logs }) {
     <div className="fixed top-24 right-6 z-50 space-y-3 max-w-md">
       <AnimatePresence mode="popLayout">
         {recentLogs.map((log, index) => {
-          const Icon = getIcon(log.message);
-          const gradient = getGradient(log.message);
-          const isCompleted = log.message.includes('✅');
+          const Icon = getIcon(log);
+          const gradient = getGradient(log);
+          const isCompleted = log.message?.includes('✅') || log.status === 'complete';
+          const isFetching = log.status === 'fetching';
+          const hasProgress = log.current !== undefined;
           
           return (
             <motion.div
@@ -128,6 +136,28 @@ export default function ProgressNotifications({ logs }) {
                     >
                       {log.message}
                     </motion.p>
+                    
+                    {/* Real-time fetch counter */}
+                    {isFetching && hasProgress && (
+                      <motion.div
+                        className="mt-1 flex items-center gap-2"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        <span className="text-xs text-gray-400 font-mono">
+                          {log.current.toLocaleString()} fetched
+                          {log.page > 0 && ` • Page ${log.page}`}
+                          {log.hasMore && (
+                            <motion.span
+                              animate={{ opacity: [0.5, 1, 0.5] }}
+                              transition={{ duration: 1.5, repeat: Infinity }}
+                            >
+                              {' '}• Loading more...
+                            </motion.span>
+                          )}
+                        </span>
+                      </motion.div>
+                    )}
                     
                     {/* Progress bar for loading logs */}
                     {!isCompleted && (

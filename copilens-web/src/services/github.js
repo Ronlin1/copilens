@@ -53,7 +53,7 @@ class GitHubService {
     return response.data;
   }
 
-  async getCommits(owner, repo, perPage = 100) {
+  async getCommits(owner, repo, perPage = 100, onProgress) {
     try {
       // Fetch ALL commits by paginating through all pages
       const commits = [];
@@ -61,6 +61,7 @@ class GitHubService {
       let hasMore = true;
       
       console.log('📥 Fetching commits (this may take a moment)...');
+      if (onProgress) onProgress({ type: 'commits', status: 'fetching', current: 0, page: 0 });
       
       while (hasMore && commits.length < 10000) { // Increased limit: 10000 commits max
         const response = await axios.get(
@@ -70,7 +71,18 @@ class GitHubService {
         
         commits.push(...response.data);
         
-        // Log progress every 5 pages
+        // Log progress every page
+        if (onProgress) {
+          onProgress({ 
+            type: 'commits', 
+            status: 'fetching', 
+            current: commits.length, 
+            page,
+            hasMore: response.data.length >= perPage
+          });
+        }
+        
+        // Log to console every 5 pages
         if (page % 5 === 0) {
           console.log(`   📊 Commits: ${commits.length} fetched (page ${page})...`);
         }
@@ -84,9 +96,11 @@ class GitHubService {
       }
       
       console.log(`✅ Fetched ${commits.length} commits from GitHub API`);
+      if (onProgress) onProgress({ type: 'commits', status: 'complete', current: commits.length, total: commits.length });
       return commits;
     } catch (error) {
       console.error('Error fetching commits:', error);
+      if (onProgress) onProgress({ type: 'commits', status: 'error', error: error.message });
       return [];
     }
   }
@@ -119,7 +133,7 @@ class GitHubService {
     }
   }
 
-  async getContributors(owner, repo) {
+  async getContributors(owner, repo, onProgress) {
     try {
       // Fetch ALL contributors by paginating
       const contributors = [];
@@ -127,14 +141,26 @@ class GitHubService {
       let hasMore = true;
       
       console.log('👥 Fetching contributors...');
+      if (onProgress) onProgress({ type: 'contributors', status: 'fetching', current: 0, page: 0 });
       
-      while (hasMore && contributors.length < 5000) { // Increased limit: 5000
+      while (hasMore && contributors.length < 10000) { // Safety limit: 10000 contributors
         const response = await axios.get(
           `${this.baseURL}/repos/${owner}/${repo}/contributors?per_page=100&page=${page}`,
           { headers: this.headers }
         );
         
         contributors.push(...response.data);
+        
+        // Report progress every page
+        if (onProgress) {
+          onProgress({ 
+            type: 'contributors', 
+            status: 'fetching', 
+            current: contributors.length, 
+            page,
+            hasMore: response.data.length >= 100
+          });
+        }
         
         // Log progress every 5 pages
         if (page % 5 === 0) {
@@ -149,9 +175,11 @@ class GitHubService {
       }
       
       console.log(`✅ Fetched ${contributors.length} contributors`);
+      if (onProgress) onProgress({ type: 'contributors', status: 'complete', current: contributors.length, total: contributors.length });
       return contributors;
     } catch (error) {
       console.error('Error fetching contributors:', error);
+      if (onProgress) onProgress({ type: 'contributors', status: 'error', error: error.message });
       return [];
     }
   }
@@ -226,7 +254,7 @@ class GitHubService {
     }
   }
 
-  async getPullRequests(owner, repo) {
+  async getPullRequests(owner, repo, onProgress) {
     try {
       // Fetch ALL pull requests
       const pullRequests = [];
@@ -234,6 +262,7 @@ class GitHubService {
       let hasMore = true;
       
       console.log('🔀 Fetching pull requests...');
+      if (onProgress) onProgress({ type: 'pull requests', status: 'fetching', current: 0, page: 0 });
       
       while (hasMore && pullRequests.length < 10000) { // Increased limit: 10000
         const response = await axios.get(
@@ -242,6 +271,17 @@ class GitHubService {
         );
         
         pullRequests.push(...response.data);
+        
+        // Report progress
+        if (onProgress) {
+          onProgress({ 
+            type: 'pull requests', 
+            status: 'fetching', 
+            current: pullRequests.length, 
+            page,
+            hasMore: response.data.length >= 100
+          });
+        }
         
         // Log progress every 10 pages
         if (page % 10 === 0) {
@@ -256,14 +296,16 @@ class GitHubService {
       }
       
       console.log(`✅ Fetched ${pullRequests.length} pull requests`);
+      if (onProgress) onProgress({ type: 'pull requests', status: 'complete', current: pullRequests.length, total: pullRequests.length });
       return pullRequests;
     } catch (error) {
       console.warn('Could not fetch pull requests:', error.message);
+      if (onProgress) onProgress({ type: 'pull requests', status: 'error', error: error.message });
       return [];
     }
   }
 
-  async getIssues(owner, repo) {
+  async getIssues(owner, repo, onProgress) {
     try {
       // Fetch ALL issues (NOTE: GitHub API returns both issues AND PRs in this endpoint)
       const issues = [];
@@ -271,6 +313,7 @@ class GitHubService {
       let hasMore = true;
       
       console.log('⚠️  Fetching issues...');
+      if (onProgress) onProgress({ type: 'issues', status: 'fetching', current: 0, page: 0 });
       
       while (hasMore && issues.length < 15000) { // Increased limit: 15000 (for repos with many issues)
         const response = await axios.get(
@@ -279,6 +322,17 @@ class GitHubService {
         );
         
         issues.push(...response.data);
+        
+        // Report progress
+        if (onProgress) {
+          onProgress({ 
+            type: 'issues', 
+            status: 'fetching', 
+            current: issues.length, 
+            page,
+            hasMore: response.data.length >= 100
+          });
+        }
         
         // Log progress every 10 pages
         if (page % 10 === 0) {
@@ -293,9 +347,11 @@ class GitHubService {
       }
       
       console.log(`✅ Fetched ${issues.length} issues (includes PRs)`);
+      if (onProgress) onProgress({ type: 'issues', status: 'complete', current: issues.length, total: issues.length });
       return issues;
     } catch (error) {
       console.warn('Could not fetch issues:', error.message);
+      if (onProgress) onProgress({ type: 'issues', status: 'error', error: error.message });
       return [];
     }
   }
@@ -332,7 +388,7 @@ class GitHubService {
     }
   }
 
-  async analyzeRepository(repoUrl) {
+  async analyzeRepository(repoUrl, onProgress) {
     const { owner, repo } = this.parseGitHubUrl(repoUrl);
 
     // Check rate limit first
@@ -340,7 +396,7 @@ class GitHubService {
 
     console.log('📥 Fetching comprehensive GitHub data...');
     
-    // Fetch core data in parallel
+    // Fetch core data in parallel with progress tracking
     const [
       repoInfo, 
       commits, 
@@ -355,15 +411,15 @@ class GitHubService {
       releases
     ] = await Promise.all([
       this.getRepoInfo(owner, repo),
-      this.getCommits(owner, repo),
-      this.getContributors(owner, repo),
+      this.getCommits(owner, repo, 100, onProgress),
+      this.getContributors(owner, repo, onProgress),
       this.getBranches(owner, repo),
       this.getLanguages(owner, repo),
       this.getRepoTree(owner, repo),
       this.getCodeFrequency(owner, repo),
       this.getCommitStats(owner, repo),
-      this.getPullRequests(owner, repo),
-      this.getIssues(owner, repo),
+      this.getPullRequests(owner, repo, onProgress),
+      this.getIssues(owner, repo, onProgress),
       this.getReleases(owner, repo)
     ]);
 

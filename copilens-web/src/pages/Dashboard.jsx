@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, BarChart3, Loader, Award, Rocket, FileText } from 'lucide-react';
 import StatsCards from '../components/Dashboard/StatsCards';
 import GitHubMetrics from '../components/Dashboard/GitHubMetrics';
@@ -10,7 +11,7 @@ import FileExplorer from '../components/Dashboard/FileExplorer';
 import ComplexityMetrics from '../components/Dashboard/ComplexityMetrics';
 import SystemsThinkingAnalysis from '../components/Dashboard/SystemsThinkingAnalysis';
 import Toast from '../components/Toast';
-import ProgressNotifications from '../components/ProgressNotifications';
+import ArchitectureDiagramModal from '../components/ArchitectureDiagramModal';
 import ErrorBoundary from '../components/ErrorBoundary';
 import githubService from '../services/github';
 import geminiService from '../services/gemini';
@@ -39,45 +40,91 @@ export default function Dashboard() {
     try {
       setLoading(true);
       setError(null);
-      setProgressLogs([]); // Clear previous logs
+      setProgressLogs([]);
 
-      // Helper to add progress logs
-      const addLog = (message) => {
-        const log = {
-          id: Date.now() + Math.random(),
-          message,
-          timestamp: Date.now()
-        };
-        setProgressLogs(prev => [...prev, log]);
-        console.log(message);
+      // INTERCEPT console.log to capture all logs as holographic notifications
+      const originalConsoleLog = console.log;
+      
+      console.log = function(...args) {
+        // Still call original console.log
+        originalConsoleLog.apply(console, args);
+        
+        const message = args.join(' ');
+        
+        // Only capture messages with emojis or specific keywords
+        if (message.includes('📥') || message.includes('👥') || message.includes('🔀') || 
+            message.includes('⚠️') || message.includes('✅') || message.includes('📊') ||
+            message.includes('🌿') || message.includes('🚀') || message.includes('🔍') ||
+            message.includes('🏗️') || message.includes('🤖') || message.includes('💡') ||
+            message.match(/\d+\s+(commits|contributors|branches|pull|issues|releases)/i)) {
+          
+          // Extract details from message
+          const countMatch = message.match(/(\d+)\s+fetched/);
+          const pageMatch = message.match(/page\s+(\d+)/i);
+          const totalMatch = message.match(/Fetched\s+(\d+)/i);
+          
+          // Determine type from message
+          let type = undefined;
+          if (message.toLowerCase().includes('commit')) type = 'commits';
+          else if (message.toLowerCase().includes('contributor')) type = 'contributors';
+          else if (message.toLowerCase().includes('pull request') || message.toLowerCase().includes('pr')) type = 'pull requests';
+          else if (message.toLowerCase().includes('issue')) type = 'issues';
+          else if (message.toLowerCase().includes('branch')) type = 'branches';
+          else if (message.toLowerCase().includes('release')) type = 'releases';
+          
+          const log = {
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Truly unique ID
+            message: message,
+            timestamp: Date.now(),
+            current: countMatch ? parseInt(countMatch[1]) : (totalMatch ? parseInt(totalMatch[1]) : undefined),
+            page: pageMatch ? parseInt(pageMatch[1]) : undefined,
+            status: message.includes('✅') ? 'complete' : 'fetching',
+            type: type,
+            hasMore: message.includes('...')
+          };
+          
+          // Update state immediately
+          setProgressLogs(prev => {
+            // If this is a progress update for same type, replace it
+            if (type && log.status === 'fetching') {
+              const existingIndex = prev.findIndex(
+                l => l.type === type && l.status === 'fetching'
+              );
+              if (existingIndex >= 0) {
+                const newLogs = [...prev];
+                newLogs[existingIndex] = log;
+                return newLogs;
+              }
+            }
+            // Otherwise add new log
+            return [...prev, log];
+          });
+        }
       };
 
-      addLog('🚀 Starting repository analysis...');
-
-      // Step 1: Fetch GitHub data
-      addLog('📊 Fetching GitHub repository data...');
+      // Start analysis with intercepted console
       const githubData = await githubService.analyzeRepository(url);
-      addLog(`✅ Fetched ${githubData.stats.totalCommits} commits, ${githubData.stats.totalContributors} contributors`);
-
-      // Step 2: Analyze code complexity
-      addLog('🔍 Analyzing code complexity...');
+      
+      // Restore original console.log
+      console.log = originalConsoleLog;      
+      // Continue with rest of analysis (still intercepting console)
+      console.log('🔍 Analyzing code complexity...');
       const complexityData = analyzeRepositoryComplexity(githubData.fileContents);
-      addLog(`✅ Analyzed ${complexityData.totalLines.toLocaleString()} lines of code`);
-
-      // Step 3: Analyze system structure
-      addLog('🏗️ Analyzing system architecture...');
+      console.log(`✅ Analyzed ${complexityData.totalLines.toLocaleString()} lines of code`);
+      console.log('🏗️ Analyzing system architecture...');
       const systemsAnalysis = analyzeSystemStructure(githubData.tree, githubData.languages);
-      addLog(`✅ Identified ${systemsAnalysis.patterns.length} architecture patterns`);
+      console.log(`✅ Identified ${systemsAnalysis.patterns.length} architecture patterns`);
 
-      // Step 4: Run Gemini AI analysis
-      addLog('🤖 Running Gemini AI analysis...');
+      console.log('🤖 Running Gemini AI analysis...');
       const aiAnalysis = await geminiService.analyzeRepository(githubData);
-      addLog(`✅ AI detection: ${aiAnalysis?.aiDetection?.percentage}% confidence`);
+      console.log(`✅ AI detection: ${aiAnalysis?.aiDetection?.percentage}% confidence`);
 
-      // Step 5: Generate systems insights
-      addLog('💡 Generating systems thinking insights...');
+      console.log('💡 Generating systems thinking insights...');
       const systemsInsights = generateSystemsInsights(githubData, complexityData);
-      addLog(`✅ Generated ${systemsInsights.length} insights`);
+      console.log(`✅ Generated ${systemsInsights.length} insights`);
+      
+      // Restore console.log after all analysis
+      console.log = originalConsoleLog;
 
       // Step 6: Use actual lines from GitHub API or calculate from complexity
       console.log('📝 Using actual lines from GitHub API...');
@@ -337,6 +384,26 @@ export default function Dashboard() {
     }
   };
 
+  const handleGenerateArchitecture = async () => {
+    setGeneratingArchitecture(true);
+    setError(null); // Clear any previous errors
+    try {
+      console.log('🎨 Starting architecture generation with data:', data);
+      const doc = await geminiService.generateArchitectureDoc(data);
+      console.log('📊 Architecture doc received:', doc);
+      console.log('🔍 Opening modal with diagram type:', doc?.type);
+      setArchitectureDoc(doc);
+      setShowArchitectureModal(true);
+      console.log('✅ Modal should now be open');
+    } catch (err) {
+      console.error('Failed to generate architecture:', err);
+      alert(`Failed to generate architecture diagram: ${err.message}\n\nPlease check the console for details.`);
+      setError(`Failed to generate architecture: ${err.message}`);
+    } finally {
+      setGeneratingArchitecture(false);
+    }
+  };
+
   useEffect(() => {
     if (repoUrl) {
       analyzeRepo(repoUrl);
@@ -375,11 +442,11 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 flex items-center justify-center px-4">
+        <div className="text-center max-w-2xl w-full">
           <motion.div
             animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             className="inline-block mb-6"
           >
             <Loader className="w-16 h-16 text-primary-500" />
@@ -387,9 +454,128 @@ export default function Dashboard() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Analyzing Repository
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
             This may take a moment...
           </p>
+          
+          {/* Holographic Progress Messages - Show only last 5 */}
+          <div className="space-y-2 mt-8">
+            <AnimatePresence mode="popLayout">
+              {progressLogs.slice(-5).map((log, index) => {
+                const gradient = 
+                  log.type === 'commits' ? 'from-blue-500 to-cyan-500' :
+                  log.type === 'contributors' ? 'from-purple-500 to-pink-500' :
+                  log.type === 'branches' ? 'from-green-500 to-emerald-500' :
+                  log.type === 'pull requests' ? 'from-orange-500 to-red-500' :
+                  log.type === 'issues' ? 'from-red-500 to-pink-500' :
+                  log.type === 'releases' ? 'from-yellow-500 to-orange-500' :
+                  'from-indigo-500 to-purple-500';
+                
+                return (
+                  <motion.div
+                    key={log.id}
+                    initial={{ opacity: 0, x: -50, scale: 0.9 }}
+                    animate={{ 
+                      opacity: 1 - (index * 0.2), // Fade older messages
+                      x: 0, 
+                      scale: 1 - (index * 0.02),
+                    }}
+                    exit={{ 
+                      opacity: 0, 
+                      x: 50,
+                      scale: 0.8,
+                      transition: { duration: 0.4 }
+                    }}
+                    transition={{ 
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 25,
+                    }}
+                    className="relative overflow-hidden rounded-lg backdrop-blur-xl bg-gray-900/80 border border-gray-700/50 p-4"
+                  >
+                    {/* Animated gradient border glow */}
+                    <motion.div
+                      className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-20`}
+                      animate={{
+                        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }}
+                      style={{ backgroundSize: '200% 200%' }}
+                    />
+                    
+                    {/* Shine effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                      animate={{
+                        x: ['-100%', '200%'],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        repeatDelay: 1,
+                      }}
+                    />
+
+                    {/* Content */}
+                    <div className="relative flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-white font-medium text-left">
+                          {log.message}
+                        </p>
+                        
+                        {/* Live counter for fetching status */}
+                        {log.status === 'fetching' && log.current !== undefined && (
+                          <motion.div
+                            className="mt-1 flex items-center gap-2 text-sm text-gray-400"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                          >
+                            <span className="font-mono">
+                              {log.current.toLocaleString()} fetched
+                              {log.page > 0 && ` • Page ${log.page}`}
+                            </span>
+                            {log.hasMore && (
+                              <motion.span
+                                animate={{ opacity: [0.5, 1, 0.5] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                                className="text-primary-400"
+                              >
+                                • Loading more...
+                              </motion.span>
+                            )}
+                          </motion.div>
+                        )}
+                      </div>
+                      
+                      {/* Status indicator */}
+                      <div className="ml-4">
+                        {log.status === 'complete' ? (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className={`w-6 h-6 rounded-full bg-gradient-to-r ${gradient} flex items-center justify-center`}
+                          >
+                            <span className="text-white text-sm">✓</span>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className={`w-6 h-6 rounded-full border-2 border-t-transparent bg-gradient-to-r ${gradient}`}
+                            style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     );
@@ -433,11 +619,6 @@ export default function Dashboard() {
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          
-          {/* Progress Notifications */}
-          {loading && progressLogs.length > 0 && (
-            <ProgressNotifications logs={progressLogs} />
-          )}
           
           {/* Header */}
           <motion.div
@@ -640,10 +821,20 @@ export default function Dashboard() {
 
             <button
               onClick={handleGenerateArchitecture}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-semibold rounded-lg hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
+              disabled={generatingArchitecture}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-semibold rounded-lg hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              <FileText size={20} />
-              Generate Architecture
+              {generatingArchitecture ? (
+                <>
+                  <Loader className="w-5 h-5 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <FileText size={20} />
+                  Generate Architecture
+                </>
+              )}
             </button>
           </motion.div>
 
@@ -724,105 +915,12 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* Architecture Modal */}
-        {showArchitectureModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={() => setShowArchitectureModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-gray-900 rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden border border-gray-700 shadow-2xl"
-            >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-700 bg-gradient-to-r from-orange-600/20 to-red-600/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-gradient-to-r from-orange-600 to-red-600 rounded-lg">
-                    <FileText className="text-white" size={28} />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white">Technical Architecture</h3>
-                    <p className="text-gray-400 text-sm">Generated by Gemini 3 Flash Preview</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowArchitectureModal(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Modal Content */}
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-                {generatingArchitecture ? (
-                  <div className="flex flex-col items-center justify-center py-20">
-                    <Loader className="w-16 h-16 text-orange-500 animate-spin mb-4" />
-                    <p className="text-gray-300 text-lg">Generating architecture document...</p>
-                    <p className="text-gray-500 text-sm mt-2">This may take 20-30 seconds</p>
-                  </div>
-                ) : architectureDoc ? (
-                  <div className="prose prose-invert prose-orange max-w-none">
-                    <div 
-                      className="text-gray-300 leading-relaxed"
-                      dangerouslySetInnerHTML={{ 
-                        __html: architectureDoc.architecture
-                          .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold text-white mb-4 mt-6">$1</h1>')
-                          .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold text-orange-400 mb-3 mt-5">$1</h2>')
-                          .replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold text-orange-300 mb-2 mt-4">$1</h3>')
-                          .replace(/^\* (.*$)/gim, '<li class="ml-4">$1</li>')
-                          .replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>')
-                          .replace(/```(\w+)?\n([\s\S]*?)```/gim, '<pre class="bg-gray-800 p-4 rounded-lg overflow-x-auto my-3"><code class="text-sm text-green-400">$2</code></pre>')
-                          .replace(/`([^`]+)`/g, '<code class="bg-gray-800 px-2 py-1 rounded text-orange-400">$1</code>')
-                          .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
-                          .replace(/\n\n/g, '<br/><br/>')
-                      }}
-                    />
-                    
-                    {/* Copy and Download Buttons */}
-                    <div className="flex gap-3 mt-8 pt-6 border-t border-gray-700">
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(architectureDoc.architecture);
-                          alert('Architecture document copied to clipboard!');
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors cursor-pointer"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        Copy to Clipboard
-                      </button>
-                      <button
-                        onClick={() => {
-                          const blob = new Blob([architectureDoc.architecture], { type: 'text/markdown' });
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = `architecture-${data?.repoInfo?.name || 'document'}.md`;
-                          a.click();
-                          URL.revokeObjectURL(url);
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors cursor-pointer"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Download Markdown
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
+        {/* Architecture Diagram Modal */}
+        <ArchitectureDiagramModal
+          isOpen={showArchitectureModal}
+          onClose={() => setShowArchitectureModal(false)}
+          diagramData={architectureDoc}
+        />
       </div>
     </ErrorBoundary>
   );
