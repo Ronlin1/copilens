@@ -55,16 +55,29 @@ class GitHubService {
 
   async getCommits(owner, repo, perPage = 100) {
     try {
-      // Fetch up to 300 commits (3 pages)
+      // Fetch ALL commits by paginating through all pages
       const commits = [];
-      for (let page = 1; page <= 3; page++) {
+      let page = 1;
+      let hasMore = true;
+      
+      console.log('📥 Fetching commits (this may take a moment)...');
+      
+      while (hasMore && commits.length < 3000) { // Safety limit: 3000 commits max
         const response = await axios.get(
           `${this.baseURL}/repos/${owner}/${repo}/commits?per_page=${perPage}&page=${page}`,
           { headers: this.headers }
         );
+        
         commits.push(...response.data);
-        if (response.data.length < perPage) break; // No more pages
+        
+        // Check if there are more pages
+        if (response.data.length < perPage) {
+          hasMore = false; // Last page
+        } else {
+          page++;
+        }
       }
+      
       console.log(`✅ Fetched ${commits.length} commits from GitHub API`);
       return commits;
     } catch (error) {
@@ -103,11 +116,30 @@ class GitHubService {
 
   async getContributors(owner, repo) {
     try {
-      const response = await axios.get(
-        `${this.baseURL}/repos/${owner}/${repo}/contributors?per_page=100`,
-        { headers: this.headers }
-      );
-      return response.data;
+      // Fetch ALL contributors by paginating
+      const contributors = [];
+      let page = 1;
+      let hasMore = true;
+      
+      console.log('👥 Fetching contributors...');
+      
+      while (hasMore && contributors.length < 1000) { // Safety limit
+        const response = await axios.get(
+          `${this.baseURL}/repos/${owner}/${repo}/contributors?per_page=100&page=${page}`,
+          { headers: this.headers }
+        );
+        
+        contributors.push(...response.data);
+        
+        if (response.data.length < 100) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
+      
+      console.log(`✅ Fetched ${contributors.length} contributors`);
+      return contributors;
     } catch (error) {
       console.error('Error fetching contributors:', error);
       return [];
@@ -116,11 +148,28 @@ class GitHubService {
 
   async getBranches(owner, repo) {
     try {
-      const response = await axios.get(
-        `${this.baseURL}/repos/${owner}/${repo}/branches`,
-        { headers: this.headers }
-      );
-      return response.data;
+      // Fetch ALL branches
+      const branches = [];
+      let page = 1;
+      let hasMore = true;
+      
+      while (hasMore && branches.length < 200) { // Safety limit
+        const response = await axios.get(
+          `${this.baseURL}/repos/${owner}/${repo}/branches?per_page=100&page=${page}`,
+          { headers: this.headers }
+        );
+        
+        branches.push(...response.data);
+        
+        if (response.data.length < 100) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
+      
+      console.log(`✅ Fetched ${branches.length} branches`);
+      return branches;
     } catch (error) {
       console.error('Error fetching branches:', error);
       return [];
@@ -167,11 +216,30 @@ class GitHubService {
 
   async getPullRequests(owner, repo) {
     try {
-      const response = await axios.get(
-        `${this.baseURL}/repos/${owner}/${repo}/pulls?state=all&per_page=100`,
-        { headers: this.headers }
-      );
-      return response.data;
+      // Fetch ALL pull requests
+      const pullRequests = [];
+      let page = 1;
+      let hasMore = true;
+      
+      console.log('🔀 Fetching pull requests...');
+      
+      while (hasMore && pullRequests.length < 500) { // Safety limit
+        const response = await axios.get(
+          `${this.baseURL}/repos/${owner}/${repo}/pulls?state=all&per_page=100&page=${page}`,
+          { headers: this.headers }
+        );
+        
+        pullRequests.push(...response.data);
+        
+        if (response.data.length < 100) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
+      
+      console.log(`✅ Fetched ${pullRequests.length} pull requests`);
+      return pullRequests;
     } catch (error) {
       console.warn('Could not fetch pull requests:', error.message);
       return [];
@@ -180,11 +248,30 @@ class GitHubService {
 
   async getIssues(owner, repo) {
     try {
-      const response = await axios.get(
-        `${this.baseURL}/repos/${owner}/${repo}/issues?state=all&per_page=100`,
-        { headers: this.headers }
-      );
-      return response.data;
+      // Fetch ALL issues (excluding PRs)
+      const issues = [];
+      let page = 1;
+      let hasMore = true;
+      
+      console.log('⚠️  Fetching issues...');
+      
+      while (hasMore && issues.length < 500) { // Safety limit
+        const response = await axios.get(
+          `${this.baseURL}/repos/${owner}/${repo}/issues?state=all&per_page=100&page=${page}`,
+          { headers: this.headers }
+        );
+        
+        issues.push(...response.data);
+        
+        if (response.data.length < 100) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
+      
+      console.log(`✅ Fetched ${issues.length} issues (includes PRs)`);
+      return issues;
     } catch (error) {
       console.warn('Could not fetch issues:', error.message);
       return [];
@@ -193,11 +280,30 @@ class GitHubService {
 
   async getReleases(owner, repo) {
     try {
-      const response = await axios.get(
-        `${this.baseURL}/repos/${owner}/${repo}/releases`,
-        { headers: this.headers }
-      );
-      return response.data;
+      // Fetch ALL releases
+      const releases = [];
+      let page = 1;
+      let hasMore = true;
+      
+      console.log('🏷️  Fetching releases...');
+      
+      while (hasMore && releases.length < 200) { // Safety limit
+        const response = await axios.get(
+          `${this.baseURL}/repos/${owner}/${repo}/releases?per_page=100&page=${page}`,
+          { headers: this.headers }
+        );
+        
+        releases.push(...response.data);
+        
+        if (response.data.length < 100) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
+      
+      console.log(`✅ Fetched ${releases.length} releases`);
+      return releases;
     } catch (error) {
       console.warn('Could not fetch releases:', error.message);
       return [];
@@ -287,6 +393,16 @@ class GitHubService {
     const openIssuesCount = issues.filter(issue => issue.state === 'open' && !issue.pull_request).length;
     const closedIssuesCount = issues.filter(issue => issue.state === 'closed' && !issue.pull_request).length;
 
+    console.log('📊 Final counts:', {
+      commits: commits.length,
+      contributors: contributors.length,
+      branches: branches.length,
+      pullRequests: pullRequests.length,
+      issues: issues.length,
+      releases: releases.length,
+      watchers: repoInfo.subscribers_count
+    });
+
     return {
       repoInfo,
       commits,
@@ -300,33 +416,33 @@ class GitHubService {
       issues,
       releases,
       stats: {
-        // Core metrics
-        totalCommits: commits.length,
-        totalContributors: contributors.length,
-        totalBranches: branches.length,
+        // Core metrics (ACTUAL from API)
+        totalCommits: commits.length, // ACTUAL count from pagination
+        totalContributors: contributors.length, // ACTUAL count from pagination
+        totalBranches: branches.length, // ACTUAL count from pagination
         totalFiles: tree.filter(t => t.type === 'blob').length,
         totalCodeFiles: codeFiles.length,
         totalSize: tree.reduce((sum, item) => sum + (item.size || 0), 0),
         
-        // Repository info
+        // Repository info (from repoInfo object)
         stars: repoInfo.stargazers_count,
         forks: repoInfo.forks_count,
-        watchers: repoInfo.watchers_count,
+        watchers: repoInfo.subscribers_count, // CORRECT field for watchers!
         openIssues: repoInfo.open_issues_count,
         
-        // Pull requests
-        totalPRs: pullRequests.length,
+        // Pull requests (ACTUAL from pagination)
+        totalPRs: pullRequests.length, // ACTUAL count
         openPRs,
         closedPRs,
         mergedPRs,
         
-        // Issues
-        totalIssues: issues.length,
+        // Issues (ACTUAL from pagination, excluding PRs)
+        totalIssues: issues.filter(i => !i.pull_request).length, // ACTUAL count
         openIssuesCount,
         closedIssuesCount,
         
-        // Releases
-        totalReleases: releases.length,
+        // Releases (ACTUAL from pagination)
+        totalReleases: releases.length, // ACTUAL count
         latestRelease: releases[0]?.tag_name || 'None',
         
         // Code metrics
