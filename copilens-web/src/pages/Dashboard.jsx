@@ -83,6 +83,73 @@ export default function Dashboard() {
 
       // Step 7: Construct final data with safe access
       console.log('🔨 Constructing final data structure...');
+      
+      // Transform languages for chart (expects array with name/value)
+      const languageChartData = Object.entries(githubData.languages).map(([name, bytes]) => ({
+        name,
+        value: bytes
+      }));
+      
+      // Build commit timeline with dates (expects array with date/count/aiDetected)
+      const commitTimeline = {};
+      githubData.commits.forEach(commit => {
+        const date = new Date(commit.commit.author.date);
+        const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        
+        if (!commitTimeline[monthYear]) {
+          commitTimeline[monthYear] = { date: monthYear, count: 0, aiDetected: 0 };
+        }
+        commitTimeline[monthYear].count++;
+        
+        // Simple AI detection heuristic based on commit message
+        const message = commit.commit.message.toLowerCase();
+        if (message.includes('copilot') || message.includes('ai-generated') || 
+            message.includes('auto-generated') || message.length < 20) {
+          commitTimeline[monthYear].aiDetected++;
+        }
+      });
+      
+      const timelineData = Object.values(commitTimeline).sort((a, b) => 
+        a.date.localeCompare(b.date)
+      );
+      
+      // Build file tree structure (expects array with name/type/children/size)
+      const buildFileTree = (files) => {
+        const root = {};
+        
+        files.forEach(file => {
+          const parts = file.path.split('/');
+          let current = root;
+          
+          parts.forEach((part, index) => {
+            if (!current[part]) {
+              current[part] = {
+                name: part,
+                type: index === parts.length - 1 ? 'file' : 'folder',
+                path: parts.slice(0, index + 1).join('/'),
+                children: {},
+                size: index === parts.length - 1 ? file.size : null
+              };
+            }
+            current = current[part].children;
+          });
+        });
+        
+        const flatten = (obj) => {
+          return Object.values(obj).map(item => ({
+            name: item.name,
+            type: item.type,
+            path: item.path,
+            size: item.size,
+            children: Object.keys(item.children).length > 0 ? flatten(item.children) : undefined
+          }));
+        };
+        
+        return flatten(root);
+      };
+      
+      const fileTreeStructure = buildFileTree(githubData.tree.slice(0, 100));
+      
       const finalData = {
         // Basic stats
         totalCommits: githubData.stats.totalCommits || 0,
@@ -97,13 +164,16 @@ export default function Dashboard() {
 
         // Additional data
         repoInfo: githubData.repoInfo,
-        commits: githubData.commits,
-        tree: githubData.tree,
+        commits: timelineData, // Formatted timeline data
+        tree: fileTreeStructure, // Formatted tree structure
         fileContents: githubData.fileContents,
-        languages: githubData.languages,
+        languages: languageChartData, // Formatted for pie chart
         
         // Analysis data
-        aiAnalysis,
+        aiAnalysis: {
+          ...aiAnalysis,
+          languages: languageChartData // For AIDetectionChart
+        },
         complexityData,
         systemsAnalysis,
         systemsInsights,
@@ -117,7 +187,16 @@ export default function Dashboard() {
         linesDeleted: finalData.linesDeleted,
         contributors: finalData.contributors,
         branches: finalData.branches,
+        hasCommitTimeline: finalData.commits?.length > 0,
+        hasFileTree: finalData.tree?.length > 0,
+        hasLanguageData: finalData.languages?.length > 0,
+        hasAIAnalysis: !!finalData.aiAnalysis,
       });
+      
+      console.log('📊 Chart Data Preview:');
+      console.log('  - Languages:', finalData.languages?.slice(0, 3));
+      console.log('  - Timeline:', finalData.commits?.slice(0, 3));
+      console.log('  - File Tree:', finalData.tree?.slice(0, 2));
 
       setData(finalData);
       console.log('✨ Repository analysis completed successfully!');
@@ -267,8 +346,8 @@ export default function Dashboard() {
             <StatsCards data={data} />
           </motion.div>
 
-          {/* AI Detection Chart */}
-          {data.aiAnalysis && (
+          {/* AI Detection Analysis */}
+          {data.aiAnalysis && data.aiAnalysis.languages && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -278,12 +357,76 @@ export default function Dashboard() {
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 AI Detection Analysis
               </h2>
-              <AIDetectionChart data={data.aiAnalysis} />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* AI Detection Summary */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50"
+                >
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                    AI Detection Score
+                  </h3>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="relative w-40 h-40">
+                      <svg className="transform -rotate-90 w-40 h-40">
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="70"
+                          stroke="currentColor"
+                          strokeWidth="12"
+                          fill="none"
+                          className="text-gray-200 dark:text-gray-700"
+                        />
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="70"
+                          stroke="currentColor"
+                          strokeWidth="12"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 70}`}
+                          strokeDashoffset={`${2 * Math.PI * 70 * (1 - (data.aiAnalysis.aiDetection?.percentage || 0) / 100)}`}
+                          className="text-purple-500"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-4xl font-bold text-gray-900 dark:text-white">
+                            {data.aiAnalysis.aiDetection?.percentage || 0}%
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            AI Detected
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Confidence:</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {data.aiAnalysis.aiDetection?.confidence || 'Medium'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Code Quality:</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {data.aiAnalysis.codeQuality?.score || 0}/10
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+                
+                {/* Language Distribution */}
+                <AIDetectionChart data={data.aiAnalysis.languages} />
+              </div>
             </motion.div>
           )}
 
           {/* Commit Timeline */}
-          {data.commits && (
+          {data.commits && data.commits.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -291,14 +434,14 @@ export default function Dashboard() {
               className="mb-12"
             >
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Recent Activity
+                Commit Activity Timeline
               </h2>
-              <CommitTimeline commits={data.commits.slice(0, 20)} />
+              <CommitTimeline data={data.commits} />
             </motion.div>
           )}
 
           {/* File Explorer */}
-          {data.tree && (
+          {data.tree && data.tree.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -308,7 +451,7 @@ export default function Dashboard() {
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 Project Structure
               </h2>
-              <FileExplorer files={data.tree.slice(0, 50)} />
+              <FileExplorer files={data.tree} />
             </motion.div>
           )}
 

@@ -57,6 +57,14 @@ function FileTreeItem({ item, level = 0 }) {
 }
 
 export default function FileExplorer({ files }) {
+  if (!files || files.length === 0) {
+    return (
+      <div className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50 text-center text-gray-500 dark:text-gray-400">
+        No file structure available
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

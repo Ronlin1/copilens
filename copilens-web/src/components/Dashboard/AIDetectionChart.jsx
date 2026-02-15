@@ -3,10 +3,15 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { Sparkles } from 'lucide-react';
 
 export default function AIDetectionChart({ data }) {
-  const chartData = Object.entries(data).map(([name, value]) => ({
-    name,
-    value
-  }));
+  if (!data || data.length === 0) {
+    return (
+      <div className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50 text-center text-gray-500 dark:text-gray-400">
+        No language data available
+      </div>
+    );
+  }
+
+  const chartData = data;
 
   const COLORS = ['#3b82f6', '#06b6d4', '#8b5cf6', '#ec4899'];
 
