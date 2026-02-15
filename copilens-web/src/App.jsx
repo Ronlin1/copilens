@@ -25,6 +25,19 @@ function LandingPage() {
     }
   }, []);
 
+  const handleAnalyze = () => {
+    if (repoUrl.trim()) {
+      window.location.href = `/dashboard?url=${encodeURIComponent(repoUrl.trim())}`;
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAnalyze();
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden">
       
@@ -99,14 +112,17 @@ function LandingPage() {
                 placeholder="Paste repository URL (GitHub/GitLab/Bitbucket)..."
                 value={repoUrl}
                 onChange={(e) => setRepoUrl(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="flex-1 px-6 py-4 bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-500 cursor-text"
               />
-              <Link to="/dashboard" className="cursor-pointer">
-                <button className="px-8 py-4 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105 w-full sm:w-auto cursor-pointer hover-lift">
-                  <Sparkles className="w-5 h-5 inline mr-2" />
-                  Analyze
-                </button>
-              </Link>
+              <button 
+                onClick={handleAnalyze}
+                disabled={!repoUrl.trim()}
+                className="px-8 py-4 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105 w-full sm:w-auto cursor-pointer hover-lift disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                <Sparkles className="w-5 h-5 inline mr-2" />
+                Analyze
+              </button>
             </div>
           </div>
         </motion.div>
