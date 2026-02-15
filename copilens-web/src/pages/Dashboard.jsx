@@ -10,6 +10,7 @@ import FileExplorer from '../components/Dashboard/FileExplorer';
 import ComplexityMetrics from '../components/Dashboard/ComplexityMetrics';
 import SystemsThinkingAnalysis from '../components/Dashboard/SystemsThinkingAnalysis';
 import Toast from '../components/Toast';
+import ProgressNotifications from '../components/ProgressNotifications';
 import ErrorBoundary from '../components/ErrorBoundary';
 import githubService from '../services/github';
 import geminiService from '../services/gemini';
@@ -32,56 +33,51 @@ export default function Dashboard() {
   const [recommendations, setRecommendations] = useState([]);
   const [deploymentSuggestions, setDeploymentSuggestions] = useState([]);
   const [systemsAnalysis, setSystemsAnalysis] = useState(null);
+  const [progressLogs, setProgressLogs] = useState([]);
 
   const analyzeRepo = async (url) => {
     try {
       setLoading(true);
       setError(null);
+      setProgressLogs([]); // Clear previous logs
 
-      console.log('🚀 Starting repository analysis for:', url);
+      // Helper to add progress logs
+      const addLog = (message) => {
+        const log = {
+          id: Date.now() + Math.random(),
+          message,
+          timestamp: Date.now()
+        };
+        setProgressLogs(prev => [...prev, log]);
+        console.log(message);
+      };
+
+      addLog('🚀 Starting repository analysis...');
 
       // Step 1: Fetch GitHub data
-      console.log('📊 Fetching GitHub repository data...');
+      addLog('📊 Fetching GitHub repository data...');
       const githubData = await githubService.analyzeRepository(url);
-      console.log('✅ GitHub data fetched successfully:', {
-        commits: githubData.stats.totalCommits,
-        contributors: githubData.stats.totalContributors,
-        branches: githubData.stats.totalBranches,
-        files: githubData.stats.totalFiles,
-      });
+      addLog(`✅ Fetched ${githubData.stats.totalCommits} commits, ${githubData.stats.totalContributors} contributors`);
 
       // Step 2: Analyze code complexity
-      console.log('🔍 Analyzing code complexity...');
+      addLog('🔍 Analyzing code complexity...');
       const complexityData = analyzeRepositoryComplexity(githubData.fileContents);
-      console.log('✅ Complexity analysis complete:', {
-        totalLines: complexityData.totalLines,
-        averageCyclomatic: complexityData.averageCyclomatic,
-        highRiskFiles: complexityData.highRiskFileCount,
-      });
+      addLog(`✅ Analyzed ${complexityData.totalLines.toLocaleString()} lines of code`);
 
       // Step 3: Analyze system structure
-      console.log('🏗️ Analyzing system architecture...');
+      addLog('🏗️ Analyzing system architecture...');
       const systemsAnalysis = analyzeSystemStructure(githubData.tree, githubData.languages);
-      console.log('✅ Systems analysis complete:', {
-        patterns: systemsAnalysis.patterns.length,
-        recommendations: systemsAnalysis.recommendations.length,
-      });
+      addLog(`✅ Identified ${systemsAnalysis.patterns.length} architecture patterns`);
 
       // Step 4: Run Gemini AI analysis
-      console.log('🤖 Running Gemini AI analysis...');
+      addLog('🤖 Running Gemini AI analysis...');
       const aiAnalysis = await geminiService.analyzeRepository(githubData);
-      console.log('✅ AI analysis complete:', {
-        aiPercentage: aiAnalysis?.aiDetection?.percentage,
-        confidence: aiAnalysis?.aiDetection?.confidence,
-        codeQualityScore: aiAnalysis?.codeQuality?.score,
-      });
+      addLog(`✅ AI detection: ${aiAnalysis?.aiDetection?.percentage}% confidence`);
 
       // Step 5: Generate systems insights
-      console.log('💡 Generating systems thinking insights...');
+      addLog('💡 Generating systems thinking insights...');
       const systemsInsights = generateSystemsInsights(githubData, complexityData);
-      console.log('✅ Systems insights generated:', {
-        insightCount: systemsInsights.length,
-      });
+      addLog(`✅ Generated ${systemsInsights.length} insights`);
 
       // Step 6: Use actual lines from GitHub API or calculate from complexity
       console.log('📝 Using actual lines from GitHub API...');
@@ -437,6 +433,11 @@ export default function Dashboard() {
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          
+          {/* Progress Notifications */}
+          {loading && progressLogs.length > 0 && (
+            <ProgressNotifications logs={progressLogs} />
+          )}
           
           {/* Header */}
           <motion.div
