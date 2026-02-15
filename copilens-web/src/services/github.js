@@ -62,13 +62,18 @@ class GitHubService {
       
       console.log('📥 Fetching commits (this may take a moment)...');
       
-      while (hasMore && commits.length < 3000) { // Safety limit: 3000 commits max
+      while (hasMore && commits.length < 10000) { // Increased limit: 10000 commits max
         const response = await axios.get(
           `${this.baseURL}/repos/${owner}/${repo}/commits?per_page=${perPage}&page=${page}`,
           { headers: this.headers }
         );
         
         commits.push(...response.data);
+        
+        // Log progress every 5 pages
+        if (page % 5 === 0) {
+          console.log(`   📊 Commits: ${commits.length} fetched (page ${page})...`);
+        }
         
         // Check if there are more pages
         if (response.data.length < perPage) {
@@ -123,13 +128,18 @@ class GitHubService {
       
       console.log('👥 Fetching contributors...');
       
-      while (hasMore && contributors.length < 1000) { // Safety limit
+      while (hasMore && contributors.length < 5000) { // Increased limit: 5000
         const response = await axios.get(
           `${this.baseURL}/repos/${owner}/${repo}/contributors?per_page=100&page=${page}`,
           { headers: this.headers }
         );
         
         contributors.push(...response.data);
+        
+        // Log progress every 5 pages
+        if (page % 5 === 0) {
+          console.log(`   📊 Contributors: ${contributors.length} fetched (page ${page})...`);
+        }
         
         if (response.data.length < 100) {
           hasMore = false;
@@ -153,7 +163,9 @@ class GitHubService {
       let page = 1;
       let hasMore = true;
       
-      while (hasMore && branches.length < 200) { // Safety limit
+      console.log('🌿 Fetching branches...');
+      
+      while (hasMore && branches.length < 1000) { // Increased limit: 1000
         const response = await axios.get(
           `${this.baseURL}/repos/${owner}/${repo}/branches?per_page=100&page=${page}`,
           { headers: this.headers }
@@ -223,13 +235,18 @@ class GitHubService {
       
       console.log('🔀 Fetching pull requests...');
       
-      while (hasMore && pullRequests.length < 500) { // Safety limit
+      while (hasMore && pullRequests.length < 10000) { // Increased limit: 10000
         const response = await axios.get(
           `${this.baseURL}/repos/${owner}/${repo}/pulls?state=all&per_page=100&page=${page}`,
           { headers: this.headers }
         );
         
         pullRequests.push(...response.data);
+        
+        // Log progress every 10 pages
+        if (page % 10 === 0) {
+          console.log(`   📊 Pull Requests: ${pullRequests.length} fetched (page ${page})...`);
+        }
         
         if (response.data.length < 100) {
           hasMore = false;
@@ -248,20 +265,25 @@ class GitHubService {
 
   async getIssues(owner, repo) {
     try {
-      // Fetch ALL issues (excluding PRs)
+      // Fetch ALL issues (NOTE: GitHub API returns both issues AND PRs in this endpoint)
       const issues = [];
       let page = 1;
       let hasMore = true;
       
       console.log('⚠️  Fetching issues...');
       
-      while (hasMore && issues.length < 500) { // Safety limit
+      while (hasMore && issues.length < 15000) { // Increased limit: 15000 (for repos with many issues)
         const response = await axios.get(
           `${this.baseURL}/repos/${owner}/${repo}/issues?state=all&per_page=100&page=${page}`,
           { headers: this.headers }
         );
         
         issues.push(...response.data);
+        
+        // Log progress every 10 pages
+        if (page % 10 === 0) {
+          console.log(`   📊 Issues: ${issues.length} fetched (page ${page})...`);
+        }
         
         if (response.data.length < 100) {
           hasMore = false;
@@ -287,7 +309,7 @@ class GitHubService {
       
       console.log('🏷️  Fetching releases...');
       
-      while (hasMore && releases.length < 200) { // Safety limit
+      while (hasMore && releases.length < 1000) { // Increased limit: 1000
         const response = await axios.get(
           `${this.baseURL}/repos/${owner}/${repo}/releases?per_page=100&page=${page}`,
           { headers: this.headers }
