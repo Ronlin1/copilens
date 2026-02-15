@@ -159,8 +159,12 @@ const SystemsThinkingAnalysis = ({ analysis, techStack }) => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {techStack.primary && (
               <div>
-                <p className="text-xs text-gray-400 mb-1">Primary Language</p>
-                <p className="text-white font-medium">{techStack.primary}</p>
+                <p className="text-xs text-gray-400 mb-1">Primary Language{Array.isArray(techStack.primary) && techStack.primary.length > 1 ? 's' : ''}</p>
+                <p className="text-white font-medium">
+                  {Array.isArray(techStack.primary) 
+                    ? techStack.primary.join(', ') 
+                    : techStack.primary}
+                </p>
               </div>
             )}
             {techStack.frameworks && techStack.frameworks.length > 0 && (
