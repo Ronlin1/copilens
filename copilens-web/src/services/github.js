@@ -441,27 +441,62 @@ class GitHubService {
       console.log(`✅ Actual lines from GitHub: +${totalLinesAdded} -${totalLinesDeleted}`);
     }
 
-    // Get sample files for AI analysis (prioritize smaller files)
-    const sortedFiles = codeFiles
-      .filter(f => f.size < 100000) // Skip very large files
-      .sort((a, b) => a.size - b.size)
-      .slice(0, 15); // Get 15 files for better analysis
-
+    // Get ALL code files for comprehensive analysis
+    console.log(`📂 Fetching content from ALL ${codeFiles.length} code files for comprehensive analysis...`);
+    
     const fileContents = [];
-    console.log(`📂 Fetching content from ${sortedFiles.length} files for analysis...`);
-
-    for (const file of sortedFiles) {
-      const content = await this.getFileContent(owner, repo, file.path);
-      if (content) {
-        fileContents.push({
-          path: file.path,
-          content: content.substring(0, 5000), // Limit to 5000 chars per file
-          size: file.size
-        });
+    let totalLinesAnalyzed = 0;
+    let filesProcessed = 0;
+    
+    // Process files in batches to avoid rate limits
+    const batchSize = 50;
+    for (let i = 0; i < codeFiles.length; i += batchSize) {
+      const batch = codeFiles.slice(i, i + batchSize);
+      
+      const batchPromises = batch.map(async (file) => {
+        try {
+          // Skip extremely large files (>1MB) to avoid memory issues
+          if (file.size > 1000000) {
+            console.log(`   ⏭️  Skipping large file: ${file.path} (${(file.size / 1024).toFixed(0)}KB)`);
+            return null;
+          }
+          
+          const content = await this.getFileContent(owner, repo, file.path);
+          if (content) {
+            const lines = content.split('\n').length;
+            totalLinesAnalyzed += lines;
+            filesProcessed++;
+            
+            // Log progress every 10 files
+            if (filesProcessed % 10 === 0) {
+              console.log(`   📄 Progress: ${filesProcessed}/${codeFiles.length} files (${totalLinesAnalyzed.toLocaleString()} lines analyzed)`);
+            }
+            
+            return {
+              path: file.path,
+              content: content, // Full content, no truncation
+              size: file.size,
+              lines: lines
+            };
+          }
+        } catch (error) {
+          console.warn(`   ⚠️  Could not fetch ${file.path}:`, error.message);
+          return null;
+        }
+        return null;
+      });
+      
+      const batchResults = await Promise.all(batchPromises);
+      fileContents.push(...batchResults.filter(f => f !== null));
+      
+      // Small delay between batches to avoid rate limiting
+      if (i + batchSize < codeFiles.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
 
-    console.log(`✅ Fetched content from ${fileContents.length} files`);
+    console.log(`✅ Fetched content from ${fileContents.length} files (${totalLinesAnalyzed.toLocaleString()} total lines analyzed)`);
+    console.log(`📊 Coverage: ${((fileContents.length / codeFiles.length) * 100).toFixed(1)}% of code files analyzed`);
 
     // Calculate additional metrics
     const openPRs = pullRequests.filter(pr => pr.state === 'open').length;

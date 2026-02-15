@@ -22,9 +22,41 @@ class GeminiService {
       this.initialize();
     }
 
-    const { repoInfo, stats, languages, commits, fileContents } = repoData;
+    const { repoInfo, stats, languages, commits, fileContents, tree } = repoData;
 
-    const prompt = `You are an expert code analyst. Analyze this GitHub repository in detail and provide comprehensive insights.
+    // Create comprehensive file statistics
+    const totalLines = fileContents.reduce((sum, f) => sum + (f.lines || 0), 0);
+    const totalFilesAnalyzed = fileContents.length;
+    const avgFileSize = fileContents.length > 0 
+      ? Math.round(fileContents.reduce((sum, f) => sum + f.size, 0) / fileContents.length)
+      : 0;
+
+    // Group files by extension for better analysis
+    const filesByExtension = {};
+    fileContents.forEach(f => {
+      const ext = f.path.split('.').pop();
+      if (!filesByExtension[ext]) filesByExtension[ext] = [];
+      filesByExtension[ext].push(f);
+    });
+
+    // Prepare comprehensive code samples (intelligently select diverse files)
+    const codeSamples = [];
+    Object.entries(filesByExtension).forEach(([ext, files]) => {
+      // Take 2-3 files per file type to get diverse coverage
+      const samplesToTake = Math.min(3, files.length);
+      files.slice(0, samplesToTake).forEach(f => {
+        codeSamples.push({
+          path: f.path,
+          extension: ext,
+          size: f.size,
+          lines: f.lines,
+          // Send first 3000 chars for analysis to avoid token limits
+          preview: f.content.substring(0, 3000)
+        });
+      });
+    });
+
+    const prompt = `You are an expert code analyst. Analyze this GitHub repository comprehensively based on ${totalFilesAnalyzed} files containing ${totalLines.toLocaleString()} lines of code.
 
 REPOSITORY INFORMATION:
 - Name: ${repoInfo.name}
@@ -35,27 +67,42 @@ REPOSITORY INFORMATION:
 - Created: ${stats.createdAt}
 - Last Updated: ${stats.lastUpdated}
 
-STATISTICS:
+COMPREHENSIVE STATISTICS:
 - Total Commits: ${stats.totalCommits}
 - Contributors: ${stats.totalContributors}
 - Branches: ${stats.totalBranches}
-- Total Files: ${stats.totalFiles}
-- Code Files: ${stats.totalCodeFiles}
+- Total Files in Repo: ${stats.totalFiles}
+- Code Files Analyzed: ${totalFilesAnalyzed} (${totalLines.toLocaleString()} lines)
+- Average File Size: ${(avgFileSize / 1024).toFixed(1)}KB
 - Repository Size: ${Math.round(stats.totalSize / 1024)}KB
+- Total Lines Added: ${stats.totalLinesAdded?.toLocaleString() || 'N/A'}
+- Total Lines Deleted: ${stats.totalLinesDeleted?.toLocaleString() || 'N/A'}
 
-LANGUAGES USED:
-${Object.entries(languages).map(([lang, bytes]) => `- ${lang}: ${Math.round(bytes / 1024)}KB`).join('\n')}
+LANGUAGES USED (by size):
+${Object.entries(languages)
+  .sort(([,a], [,b]) => b - a)
+  .map(([lang, bytes]) => `- ${lang}: ${Math.round(bytes / 1024)}KB (${((bytes / stats.totalSize) * 100).toFixed(1)}%)`)
+  .join('\n')}
 
-RECENT COMMITS (Last ${commits.length}):
+FILE TYPE DISTRIBUTION:
+${Object.entries(filesByExtension)
+  .sort(([,a], [,b]) => b.length - a.length)
+  .map(([ext, files]) => `- .${ext}: ${files.length} files (${files.reduce((sum, f) => sum + (f.lines || 0), 0).toLocaleString()} lines)`)
+  .join('\n')}
+
+RECENT COMMITS (Last ${Math.min(commits.length, 10)}):
 ${commits.slice(0, 10).map(c => `- ${c.commit.message.split('\n')[0]} (by ${c.commit.author.name})`).join('\n')}
 
-SAMPLE CODE FILES (for pattern analysis):
-${fileContents.map(f => `
-File: ${f.path}
-Size: ${f.size} bytes
-Content Preview:
-${f.content.substring(0, 1000)}
----`).join('\n')}
+CODE SAMPLES FROM ${codeSamples.length} DIVERSE FILES:
+${codeSamples.map(f => `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📄 File: ${f.path}
+📊 Stats: ${f.lines} lines, ${(f.size / 1024).toFixed(1)}KB
+🔤 Type: .${f.extension}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${f.preview}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`).join('\n')}
 
 ANALYSIS REQUIRED:
 
