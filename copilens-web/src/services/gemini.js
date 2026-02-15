@@ -234,6 +234,97 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting or additional text.`;
       throw new Error('Failed to get AI response: ' + error.message);
     }
   }
+
+  async generateArchitecture(githubData) {
+    try {
+      console.log('🏗️ Generating system architecture with Gemini...');
+      
+      if (!this.ai) {
+        this.initialize();
+      }
+
+      // Prepare data for architecture analysis
+      const languagesInfo = Object.entries(githubData.languages || {})
+        .map(([lang, bytes]) => `${lang}: ${bytes} bytes`)
+        .join('\n');
+      
+      const fileStructure = githubData.tree
+        ?.filter(f => f.type === 'blob')
+        .slice(0, 50)
+        .map(f => f.path)
+        .join('\n') || 'No file structure available';
+
+      const prompt = `You are a senior software architect. Analyze this repository and generate a comprehensive technical architecture document.
+
+REPOSITORY INFORMATION:
+Name: ${githubData.repoInfo?.name || 'Unknown'}
+Description: ${githubData.repoInfo?.description || 'No description'}
+Primary Language: ${githubData.repoInfo?.language || 'Unknown'}
+Stars: ${githubData.stats?.stars || 0}
+Contributors: ${githubData.stats?.totalContributors || 0}
+Total Commits: ${githubData.stats?.totalCommits || 0}
+
+LANGUAGES USED:
+${languagesInfo}
+
+FILE STRUCTURE (Sample):
+${fileStructure}
+
+CODE SAMPLES:
+${githubData.fileContents?.slice(0, 3).map(f => `
+File: ${f.path}
+\`\`\`
+${f.content.substring(0, 1000)}
+\`\`\`
+`).join('\n') || 'No code samples available'}
+
+Please generate a detailed technical architecture document including:
+
+1. **Architecture Overview**: High-level architecture pattern (MVC, microservices, monolith, etc.)
+2. **Technology Stack**: Detailed breakdown of technologies, frameworks, and libraries
+3. **System Components**: Main components/modules and their responsibilities
+4. **Data Flow**: How data moves through the system
+5. **Key Design Patterns**: Identified design patterns used
+6. **Infrastructure Requirements**: Deployment, scaling, and infrastructure needs
+7. **Security Considerations**: Authentication, authorization, data protection
+8. **Performance Characteristics**: Expected performance profile and bottlenecks
+9. **Scalability Analysis**: How the system scales (horizontal/vertical)
+10. **Technical Debt & Recommendations**: Areas for improvement
+
+Format your response in Markdown with clear headings, bullet points, and code references where appropriate.
+Make it professional and suitable for technical documentation.`;
+
+      const response = await this.ai.models.generateContent({
+        model: this.model,
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          temperature: 0.7,
+          maxOutputTokens: 4096,
+        }
+      });
+
+      let architecture = '';
+      for await (const chunk of response) {
+        if (chunk.text) {
+          architecture += chunk.text;
+        }
+      }
+      
+      console.log('✅ Architecture generated successfully');
+      
+      return {
+        architecture: architecture || 'Failed to generate architecture',
+        generatedAt: new Date().toISOString(),
+        modelUsed: 'gemini-3-flash-preview'
+      };
+    } catch (error) {
+      console.error('❌ Architecture generation failed:', error);
+      return {
+        architecture: '# Architecture Generation Failed\n\nPlease try again later.',
+        error: error.message
+      };
+    }
+  }
 }
 
 export default new GeminiService();
