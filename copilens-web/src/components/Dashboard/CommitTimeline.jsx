@@ -36,13 +36,16 @@ export default function CommitTimeline({ data }) {
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
           <XAxis 
-            dataKey="date" 
+            dataKey="displayDate" 
             stroke="#9ca3af"
-            style={{ fontSize: '12px' }}
+            tick={{ fill: '#9ca3af', fontSize: 12 }}
+            angle={-45}
+            textAnchor="end"
+            height={80}
           />
           <YAxis 
             stroke="#9ca3af"
-            style={{ fontSize: '12px' }}
+            tick={{ fill: '#9ca3af' }}
           />
           <Tooltip
             contentStyle={{

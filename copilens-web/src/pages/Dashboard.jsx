@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { AlertCircle, BarChart3, Loader } from 'lucide-react';
+import { AlertCircle, BarChart3, Loader, Award, Rocket } from 'lucide-react';
 import StatsCards from '../components/Dashboard/StatsCards';
 import AIDetectionChart from '../components/Dashboard/AIDetectionChart';
 import CommitTimeline from '../components/Dashboard/CommitTimeline';
 import FileExplorer from '../components/Dashboard/FileExplorer';
 import ComplexityMetrics from '../components/Dashboard/ComplexityMetrics';
+import SystemsThinkingAnalysis from '../components/Dashboard/SystemsThinkingAnalysis';
 import Toast from '../components/Toast';
 import ErrorBoundary from '../components/ErrorBoundary';
 import githubService from '../services/github';
@@ -16,14 +17,17 @@ import { analyzeSystemStructure, generateSystemsInsights } from '../utils/system
 
 export default function Dashboard() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const repoUrl = searchParams.get('url');
   
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showToast, setShowToast] = useState(false);
+  const [showDeployDialog, setShowDeployDialog] = useState(false);
   const [recommendations, setRecommendations] = useState([]);
   const [deploymentSuggestions, setDeploymentSuggestions] = useState([]);
+  const [systemsAnalysis, setSystemsAnalysis] = useState(null);
 
   const analyzeRepo = async (url) => {
     try {
@@ -95,27 +99,31 @@ export default function Dashboard() {
         value: bytes
       }));
       
-      // Build commit timeline with ACCURATE AI detection based on actual analysis
-      const commitTimeline = {};
+      // Build commit timeline with ACCURATE AI detection and actual dates
+      const commitsByDate = {};
       const aiPercentage = aiAnalysis?.aiDetection?.percentage || 0;
       
       githubData.commits.forEach((commit, index) => {
         const date = new Date(commit.commit.author.date);
-        const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD format
         
-        if (!commitTimeline[monthYear]) {
-          commitTimeline[monthYear] = { date: monthYear, count: 0, aiDetected: 0 };
+        if (!commitsByDate[dateKey]) {
+          commitsByDate[dateKey] = { 
+            date: dateKey, 
+            displayDate: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            count: 0, 
+            aiDetected: 0 
+          };
         }
-        commitTimeline[monthYear].count++;
+        commitsByDate[dateKey].count++;
         
         // Distribute AI-detected commits proportionally based on Gemini analysis
-        // This ensures the total AI-detected matches the overall percentage
         if (index < githubData.commits.length * (aiPercentage / 100)) {
-          commitTimeline[monthYear].aiDetected++;
+          commitsByDate[dateKey].aiDetected++;
         }
       });
       
-      const timelineData = Object.values(commitTimeline).sort((a, b) => 
+      const timelineData = Object.values(commitsByDate).sort((a, b) => 
         a.date.localeCompare(b.date)
       );
       
@@ -284,16 +292,18 @@ export default function Dashboard() {
       console.log('  - File Tree:', finalData.tree?.slice(0, 2));
 
       setData(finalData);
+      setSystemsAnalysis(systemsAnalysis);
       
       // Generate recommendations
       const recs = [
         ...(aiAnalysis?.recommendations || []),
-        ...systemsAnalysis.recommendations
+        ...(systemsAnalysis?.recommendations || [])
       ].slice(0, 5);
       
       setRecommendations(recs);
       setDeploymentSuggestions(deploymentSuggestions);
       
+      // Don't auto-show toast - user will click "View Recommendations" button
       // Show toast after a short delay
       setTimeout(() => {
         setShowToast(true);
@@ -558,6 +568,48 @@ export default function Dashboard() {
             </motion.div>
           )}
 
+          {/* Systems Thinking Analysis */}
+          {systemsAnalysis && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mb-12"
+            >
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                Systems Thinking Analysis
+              </h2>
+              <SystemsThinkingAnalysis 
+                analysis={systemsAnalysis} 
+                techStack={data.aiAnalysis?.techStack}
+              />
+            </motion.div>
+          )}
+
+          {/* Action Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex gap-4 justify-center mb-12"
+          >
+            <button
+              onClick={() => setShowToast(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
+            >
+              <Award size={20} />
+              View Recommendations
+            </button>
+            
+            <button
+              onClick={() => setShowDeployDialog(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-teal-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
+            >
+              <Rocket size={20} />
+              Deploy This Project
+            </button>
+          </motion.div>
+
         </div>
         
         {/* Toast Notification */}
@@ -570,6 +622,69 @@ export default function Dashboard() {
             onClose={() => setShowToast(false)}
             duration={15000}
           />
+        )}
+
+        {/* Deployment Dialog */}
+        {showDeployDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setShowDeployDialog(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gray-800 rounded-2xl p-8 max-w-lg w-full border border-gray-700 shadow-2xl"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-gradient-to-r from-green-600 to-teal-600 rounded-lg">
+                  <Rocket className="text-white" size={28} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Deploy Your Project</h3>
+                  <p className="text-gray-400 text-sm">One-click deployment setup</p>
+                </div>
+              </div>
+              
+              <p className="text-gray-300 mb-6 leading-relaxed">
+                Would you like to set up one-click deployment for this repository? 
+                We'll guide you through the best deployment options based on your tech stack.
+              </p>
+              
+              {deploymentSuggestions.length > 0 && (
+                <div className="mb-6 space-y-2">
+                  <p className="text-sm text-gray-400 font-medium mb-3">Recommended Platforms:</p>
+                  {deploymentSuggestions.map((platform, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-sm">
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
+                      <span className="text-white font-medium">{platform.name}</span>
+                      <span className="text-gray-400">({platform.confidence}% match)</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeployDialog(false);
+                    navigate('/deploy');
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-teal-700 transition-all cursor-pointer"
+                >
+                  Yes, Let's Deploy!
+                </button>
+                <button
+                  onClick={() => setShowDeployDialog(false)}
+                  className="px-4 py-3 bg-gray-700 text-gray-300 font-semibold rounded-lg hover:bg-gray-600 transition-all cursor-pointer"
+                >
+                  Not Now
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </div>
     </ErrorBoundary>
