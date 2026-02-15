@@ -3,9 +3,20 @@ import axios from 'axios';
 class GitHubService {
   constructor() {
     this.baseURL = 'https://api.github.com';
+    this.token = import.meta.env.VITE_GITHUB_TOKEN;
+    
+    // Set up headers with or without authentication
     this.headers = {
       'Accept': 'application/vnd.github.v3+json'
     };
+    
+    if (this.token && this.token.trim() !== '') {
+      this.headers['Authorization'] = `token ${this.token}`;
+      console.log('✅ GitHub API: Using authenticated requests (5,000/hour)');
+    } else {
+      console.warn('⚠️  GitHub API: Using unauthenticated requests (60/hour)');
+      console.warn('   Add VITE_GITHUB_TOKEN to .env for better rate limits');
+    }
   }
 
   parseGitHubUrl(url) {
