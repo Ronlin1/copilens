@@ -5,7 +5,7 @@ import https from 'https';
 import { GoogleGenAI } from '@google/genai';
 
 const GITHUB_URL = 'https://github.com/Tech-Atlas-Uganda/tech_atlas';
-const API_KEY = 'AIzaSyCtqEETE38ipKKVQmMuncoRvw2wOp5SnxY';
+const API_KEY = 'YOUR_GEMINI_API_KEY_HERE';
 
 console.log('🧪 Testing Copilens Analysis Pipeline\n');
 

@@ -70,7 +70,7 @@
 ### 1. **Set Up API Key**
    ```env
    # File: copilens-web/.env
-   VITE_GEMINI_API_KEY=AIzaSyCtqEETE38ipKKVQmMuncoRvw2wOp5SnxY
+   VITE_GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
    ```
    ✅ Already configured!
 

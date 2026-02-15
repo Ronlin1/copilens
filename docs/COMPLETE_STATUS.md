@@ -143,7 +143,7 @@ See `TESTING_GUIDE.md` for comprehensive 10-test verification
 **Location:** `copilens-web/.env`
 
 ```env
-VITE_GEMINI_API_KEY=AIzaSyCtqEETE38ipKKVQmMuncoRvw2wOp5SnxY
+VITE_GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
 ```
 
 **Status:** ✅ Configured and verified working
