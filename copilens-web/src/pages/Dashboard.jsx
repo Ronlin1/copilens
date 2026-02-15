@@ -123,6 +123,17 @@ export default function Dashboard() {
       const systemsInsights = generateSystemsInsights(githubData, complexityData);
       console.log(`✅ Generated ${systemsInsights.length} insights`);
       
+      // Analyze high-risk files with Gemini Pro
+      let highRiskAnalysis = null;
+      if (complexityData.topRiskyFiles && complexityData.topRiskyFiles.length > 0) {
+        console.log(`🎯 Analyzing ${complexityData.topRiskyFiles.length} high-risk files with Gemini Pro...`);
+        highRiskAnalysis = await geminiService.analyzeHighRiskFiles(
+          complexityData.topRiskyFiles,
+          githubData
+        );
+        console.log('✅ High-risk analysis complete');
+      }
+      
       // Restore console.log after all analysis
       console.log = originalConsoleLog;
 
@@ -321,6 +332,7 @@ export default function Dashboard() {
         complexityData,
         systemsAnalysis,
         systemsInsights,
+        highRiskAnalysis, // Add Gemini Pro analysis of high-risk files
         
         // GitHub-specific stats
         githubStats: githubData.stats,

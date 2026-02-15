@@ -106,58 +106,157 @@ export function calculateMaintainabilityIndex(code, cyclomatic, halstead) {
 }
 
 /**
- * Calculate Code Risk
+ * Calculate Code Risk Score with Advanced Algorithm
+ * Based on industry-standard metrics and empirical research
  */
 export function calculateCodeRisk(fileData) {
   let riskScore = 0;
   const factors = [];
+  const weights = {
+    complexity: 0.3,
+    maintainability: 0.25,
+    size: 0.2,
+    documentation: 0.15,
+    bugPotential: 0.1
+  };
   
   const code = fileData.content;
+  const path = fileData.path;
+  const lines = code.split('\n').length;
+  
+  // EXCLUDE configuration/initialization files from risk scoring
+  const isConfigFile = /\.(config|rc|json|ya?ml|toml|lock|md|txt)$/i.test(path);
+  const isInitFile = /(^|\/)(index\.(js|ts|jsx|tsx)|__init__\.py|setup\.py|package\.json)$/i.test(path);
+  const isTestFile = /(test|spec|\.test\.|\.spec\.)/i.test(path);
+  
+  // Skip risk analysis for these file types
+  if (isConfigFile || isTestFile) {
+    return {
+      score: 0,
+      level: 'Low',
+      color: 'green',
+      factors: ['Configuration/Test file - excluded from risk analysis'],
+      excluded: true
+    };
+  }
+  
+  // Init files get reduced scoring (they're typically simple)
+  const isInitMultiplier = isInitFile ? 0.3 : 1.0;
+  
   const cyclomatic = calculateCyclomaticComplexity(code);
   const cognitive = calculateCognitiveComplexity(code);
   const halstead = calculateHalsteadMetrics(code);
+  const maintainability = calculateMaintainabilityIndex(code, cyclomatic, halstead);
   
-  if (cyclomatic > 20) {
-    riskScore += 30;
-    factors.push('Very high cyclomatic complexity');
+  // 1. COMPLEXITY RISK (30% weight)
+  let complexityRisk = 0;
+  if (cyclomatic > 50) {
+    complexityRisk = 100;
+    factors.push(`Critical cyclomatic complexity: ${cyclomatic}`);
+  } else if (cyclomatic > 30) {
+    complexityRisk = 80;
+    factors.push(`Very high cyclomatic complexity: ${cyclomatic}`);
+  } else if (cyclomatic > 20) {
+    complexityRisk = 60;
+    factors.push(`High cyclomatic complexity: ${cyclomatic}`);
   } else if (cyclomatic > 10) {
-    riskScore += 15;
-    factors.push('High cyclomatic complexity');
+    complexityRisk = 30;
+    factors.push(`Moderate cyclomatic complexity: ${cyclomatic}`);
   }
   
-  if (cognitive > 30) {
-    riskScore += 25;
-    factors.push('Very difficult to understand');
+  if (cognitive > 50) {
+    complexityRisk = Math.max(complexityRisk, 90);
+    factors.push(`Extremely difficult to understand (cognitive: ${cognitive})`);
+  } else if (cognitive > 30) {
+    complexityRisk = Math.max(complexityRisk, 70);
+    factors.push(`Very difficult to understand (cognitive: ${cognitive})`);
   } else if (cognitive > 15) {
-    riskScore += 10;
-    factors.push('Moderately complex logic');
+    complexityRisk = Math.max(complexityRisk, 40);
+    factors.push(`Moderately complex logic (cognitive: ${cognitive})`);
   }
   
-  const lines = code.split('\n').length;
-  if (lines > 500) {
-    riskScore += 20;
-    factors.push('Very large file (>500 lines)');
+  riskScore += complexityRisk * weights.complexity * isInitMultiplier;
+  
+  // 2. MAINTAINABILITY RISK (25% weight)
+  let maintainabilityRisk = 0;
+  if (maintainability && maintainability.score < 20) {
+    maintainabilityRisk = 100;
+    factors.push(`Critical maintainability (${maintainability.score}/100)`);
+  } else if (maintainability && maintainability.score < 40) {
+    maintainabilityRisk = 70;
+    factors.push(`Poor maintainability (${maintainability.score}/100)`);
+  } else if (maintainability && maintainability.score < 65) {
+    maintainabilityRisk = 40;
+    factors.push(`Low maintainability (${maintainability.score}/100)`);
+  }
+  
+  riskScore += maintainabilityRisk * weights.maintainability;
+  
+  // 3. SIZE RISK (20% weight)
+  let sizeRisk = 0;
+  if (lines > 1000) {
+    sizeRisk = 100;
+    factors.push(`Extremely large file: ${lines} lines (should be <300)`);
+  } else if (lines > 500) {
+    sizeRisk = 70;
+    factors.push(`Very large file: ${lines} lines (should be <300)`);
   } else if (lines > 300) {
-    riskScore += 10;
-    factors.push('Large file (>300 lines)');
+    sizeRisk = 40;
+    factors.push(`Large file: ${lines} lines (recommended <300)`);
   }
   
-  const commentLines = (code.match(/\/\/|\/\*|\*\/|#/g) || []).length;
-  if (commentLines / lines < 0.05) {
-    riskScore += 15;
-    factors.push('Insufficient documentation');
+  riskScore += sizeRisk * weights.size * isInitMultiplier;
+  
+  // 4. DOCUMENTATION RISK (15% weight)
+  let docRisk = 0;
+  const commentLines = (code.match(/\/\/|\/\*|\*\/|#|"""|'''/g) || []).length;
+  const commentRatio = commentLines / lines;
+  
+  if (lines > 100 && commentRatio < 0.02) {
+    docRisk = 80;
+    factors.push(`Severely under-documented: ${(commentRatio * 100).toFixed(1)}% comments`);
+  } else if (lines > 50 && commentRatio < 0.05) {
+    docRisk = 50;
+    factors.push(`Under-documented: ${(commentRatio * 100).toFixed(1)}% comments`);
+  } else if (commentRatio < 0.1) {
+    docRisk = 25;
+    factors.push(`Low documentation: ${(commentRatio * 100).toFixed(1)}% comments`);
   }
   
-  if (halstead && halstead.bugsDelivered > 1) {
-    riskScore += Math.min(20, halstead.bugsDelivered * 5);
-    factors.push(`Estimated ${halstead.bugsDelivered} potential bugs`);
+  riskScore += docRisk * weights.documentation;
+  
+  // 5. BUG POTENTIAL (10% weight)
+  let bugRisk = 0;
+  if (halstead && halstead.bugsDelivered > 5) {
+    bugRisk = 100;
+    factors.push(`Very high bug potential: ${halstead.bugsDelivered.toFixed(2)} estimated bugs`);
+  } else if (halstead && halstead.bugsDelivered > 2) {
+    bugRisk = 60;
+    factors.push(`High bug potential: ${halstead.bugsDelivered.toFixed(2)} estimated bugs`);
+  } else if (halstead && halstead.bugsDelivered > 1) {
+    bugRisk = 30;
+    factors.push(`Moderate bug potential: ${halstead.bugsDelivered.toFixed(2)} estimated bugs`);
   }
+  
+  riskScore += bugRisk * weights.bugPotential;
+  
+  // Calculate final weighted score
+  const finalScore = Math.min(100, Math.round(riskScore));
   
   return {
-    score: Math.min(100, riskScore),
-    level: riskScore > 70 ? 'Critical' : riskScore > 40 ? 'High' : riskScore > 20 ? 'Medium' : 'Low',
-    color: riskScore > 70 ? 'red' : riskScore > 40 ? 'orange' : riskScore > 20 ? 'yellow' : 'green',
-    factors
+    score: finalScore,
+    level: finalScore > 75 ? 'Critical' : finalScore > 50 ? 'High' : finalScore > 25 ? 'Medium' : 'Low',
+    color: finalScore > 75 ? 'red' : finalScore > 50 ? 'orange' : finalScore > 25 ? 'yellow' : 'green',
+    factors: factors.length > 0 ? factors : ['Code quality is acceptable'],
+    metrics: {
+      cyclomatic,
+      cognitive,
+      lines,
+      commentRatio: (commentRatio * 100).toFixed(1) + '%',
+      maintainabilityIndex: maintainability?.score || 0,
+      estimatedBugs: halstead?.bugsDelivered?.toFixed(2) || 0
+    },
+    excluded: false
   };
 }
 
@@ -170,6 +269,7 @@ export function analyzeRepositoryComplexity(files) {
   let totalCognitive = 0;
   let totalLines = 0;
   let highRiskFiles = 0;
+  let criticalRiskFiles = 0;
   
   for (const file of files) {
     if (!file.content) continue;
@@ -185,7 +285,10 @@ export function analyzeRepositoryComplexity(files) {
     totalCognitive += cognitive;
     totalLines += lines;
     
-    if (risk.score > 40) highRiskFiles++;
+    if (!risk.excluded) {  // Only count non-excluded files
+      if (risk.score > 75) criticalRiskFiles++;
+      if (risk.score > 50) highRiskFiles++;
+    }
     
     analyses.push({
       path: file.path,
@@ -198,15 +301,29 @@ export function analyzeRepositoryComplexity(files) {
     });
   }
   
-  analyses.sort((a, b) => b.risk.score - a.risk.score);
+  // Sort by risk score, but put excluded files at the end
+  analyses.sort((a, b) => {
+    if (a.risk.excluded && !b.risk.excluded) return 1;
+    if (!a.risk.excluded && b.risk.excluded) return -1;
+    return b.risk.score - a.risk.score;
+  });
+  
+  // Get top risky files (excluding config/test files)
+  const topRiskyFiles = analyses
+    .filter(a => !a.risk.excluded)
+    .slice(0, 15);
+  
+  const analyzedFiles = analyses.filter(a => !a.risk.excluded).length;
   
   return {
     files: analyses,
-    topRiskyFiles: analyses.slice(0, 10),
-    averageCyclomatic: files.length > 0 ? Math.round(totalCyclomatic / files.length) : 0,
-    averageCognitive: files.length > 0 ? Math.round(totalCognitive / files.length) : 0,
+    topRiskyFiles,
+    averageCyclomatic: analyzedFiles > 0 ? Math.round(totalCyclomatic / analyzedFiles) : 0,
+    averageCognitive: analyzedFiles > 0 ? Math.round(totalCognitive / analyzedFiles) : 0,
     totalLines,
     highRiskFileCount: highRiskFiles,
-    overallRisk: highRiskFiles > files.length * 0.3 ? 'High' : highRiskFiles > files.length * 0.1 ? 'Medium' : 'Low'
+    criticalRiskFileCount: criticalRiskFiles,
+    totalFilesAnalyzed: analyzedFiles,
+    overallRisk: criticalRiskFiles > 0 ? 'Critical' : highRiskFiles > analyzedFiles * 0.3 ? 'High' : highRiskFiles > analyzedFiles * 0.1 ? 'Medium' : 'Low'
   };
 }

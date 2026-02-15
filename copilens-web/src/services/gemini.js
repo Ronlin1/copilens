@@ -5,6 +5,7 @@ class GeminiService {
   constructor() {
     this.ai = null;
     this.model = 'gemini-3-flash-preview';
+    this.proModel = 'gemini-3-pro-preview'; // For deeper analysis
   }
 
   initialize() {
@@ -699,6 +700,82 @@ This appears to be a modern application following industry best practices.
         imageData: null,
         type: 'text' 
       };
+    }
+  }
+
+  async analyzeHighRiskFiles(riskFiles, repoData) {
+    try {
+      console.log(`🔍 Analyzing ${riskFiles.length} high-risk files with Gemini Pro...`);
+      
+      if (!this.ai) {
+        this.initialize();
+      }
+
+      const filesAnalysis = riskFiles.map(f => ({
+        path: f.path,
+        riskScore: f.risk.score,
+        riskLevel: f.risk.level,
+        lines: f.lines,
+        cyclomatic: f.cyclomatic,
+        cognitive: f.cognitive,
+        factors: f.risk.factors,
+        metrics: f.risk.metrics
+      }));
+
+      const prompt = `As a senior software architect and code quality expert, analyze these high-risk files and provide specific, actionable refactoring recommendations.
+
+REPOSITORY: ${repoData.repoInfo?.name || 'Unknown'}
+HIGH-RISK FILES DETECTED: ${riskFiles.length}
+
+FILES ANALYSIS:
+${filesAnalysis.map((f, i) => `
+${i + 1}. ${f.path}
+   - Risk Score: ${f.riskScore}/100 (${f.riskLevel} Risk)
+   - Size: ${f.lines} lines
+   - Cyclomatic Complexity: ${f.cyclomatic}
+   - Cognitive Complexity: ${f.cognitive}
+   - Maintainability Index: ${f.metrics.maintainabilityIndex}/100
+   - Comment Ratio: ${f.metrics.commentRatio}
+   - Estimated Bugs: ${f.metrics.estimatedBugs}
+   - Risk Factors: ${f.factors.join(', ')}
+`).join('\n')}
+
+Provide a comprehensive analysis with:
+
+1. **Root Cause Analysis**: Why are these files high-risk? Common patterns?
+2. **Refactoring Strategy**: Specific step-by-step refactoring plan for top 3 files
+3. **Design Pattern Recommendations**: Which patterns would help?
+4. **Testing Strategy**: How to safely refactor these files?
+5. **Priority Ranking**: Which files to tackle first and why?
+6. **Quick Wins**: Simple changes that reduce risk significantly
+7. **Long-term Architecture**: How should this code be restructured?
+
+Format as markdown with clear sections and code examples where relevant.`;
+
+      const response = await this.ai.models.generateContent({
+        model: this.proModel, // Use Pro model for deep analysis
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          temperature: 0.7,
+          maxOutputTokens: 4096, // More tokens for detailed analysis
+        }
+      });
+
+      const analysis = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      
+      console.log('✅ High-risk file analysis complete');
+      return analysis;
+      
+    } catch (error) {
+      console.error('❌ High-risk file analysis failed:', error);
+      return `# High-Risk File Analysis
+
+Analysis failed: ${error.message}
+
+## Detected High-Risk Files:
+${riskFiles.map((f, i) => `${i + 1}. **${f.path}** - Risk Score: ${f.risk.score}/100`).join('\n')}
+
+Please review these files manually for refactoring opportunities.`;
     }
   }
 }
