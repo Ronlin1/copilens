@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AlertCircle, BarChart3, Loader, Award, Rocket } from 'lucide-react';
 import StatsCards from '../components/Dashboard/StatsCards';
+import GitHubMetrics from '../components/Dashboard/GitHubMetrics';
 import AIDetectionChart from '../components/Dashboard/AIDetectionChart';
 import CommitTimeline from '../components/Dashboard/CommitTimeline';
 import FileExplorer from '../components/Dashboard/FileExplorer';
@@ -79,16 +80,20 @@ export default function Dashboard() {
         insightCount: systemsInsights.length,
       });
 
-      // Step 6: Calculate lines changed
-      console.log('📝 Calculating lines changed statistics...');
-      const totalLines = complexityData.totalLines;
-      const linesAdded = Math.round(totalLines * 0.6);
-      const linesDeleted = Math.round(totalLines * 0.3);
-      console.log('✅ Lines statistics calculated:', {
-        totalLines,
-        estimated_linesAdded: linesAdded,
-        estimated_linesDeleted: linesDeleted,
-      });
+      // Step 6: Use actual lines from GitHub API or calculate from complexity
+      console.log('📝 Using actual lines from GitHub API...');
+      const linesAdded = githubData.stats.linesAdded || Math.round(complexityData.totalLines * 0.6);
+      const linesDeleted = githubData.stats.linesDeleted || Math.round(complexityData.totalLines * 0.3);
+      
+      if (githubData.stats.linesAdded > 0) {
+        console.log('✅ Using ACTUAL GitHub API stats:', {
+          linesAdded: githubData.stats.linesAdded.toLocaleString(),
+          linesDeleted: githubData.stats.linesDeleted.toLocaleString(),
+          netChange: githubData.stats.netLinesChanged.toLocaleString()
+        });
+      } else {
+        console.log('⚠️ GitHub stats unavailable, using estimates from complexity analysis');
+      }
 
       // Step 7: Construct final data with safe access
       console.log('🔨 Constructing final data structure...');
@@ -270,6 +275,14 @@ export default function Dashboard() {
         complexityData,
         systemsAnalysis,
         systemsInsights,
+        
+        // GitHub-specific stats
+        githubStats: githubData.stats,
+        rawGitHubData: {
+          pullRequests: githubData.pullRequests,
+          issues: githubData.issues,
+          releases: githubData.releases
+        }
       };
 
       console.log('✅ Final data structure constructed successfully:', {
@@ -455,6 +468,18 @@ export default function Dashboard() {
             </h2>
             <StatsCards data={data} />
           </motion.div>
+
+          {/* GitHub Metrics */}
+          {data.githubStats && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="mb-12"
+            >
+              <GitHubMetrics stats={data.githubStats} repoInfo={data.repoInfo} />
+            </motion.div>
+          )}
 
           {/* Complexity Metrics */}
           <ComplexityMetrics data={data} />
