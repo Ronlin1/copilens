@@ -6,7 +6,7 @@ export default function CLIPage() {
     {
       title: '1. Clone Repository',
       description: 'Get the latest version from GitHub',
-      command: 'git clone https://github.com/yourusername/copilens.git'
+      command: 'git clone https://github.com/Ronlin1/copilens'
     },
     {
       title: '2. Navigate to CLI',
