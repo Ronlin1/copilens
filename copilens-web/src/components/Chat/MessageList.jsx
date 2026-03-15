@@ -65,8 +65,8 @@ export default function MessageList({ messages, isLoading }) {
           {/* Avatar */}
           <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
             message.role === 'user'
-              ? 'bg-gradient-to-r from-primary-500 to-cyber-500'
-              : 'bg-gradient-to-r from-purple-500 to-pink-500'
+              ? 'bg-linear-to-r from-primary-500 to-cyber-500'
+              : 'bg-linear-to-r from-purple-500 to-pink-500'
           }`}>
             {message.role === 'user' ? (
               <User className="w-5 h-5 text-white" />
@@ -79,7 +79,7 @@ export default function MessageList({ messages, isLoading }) {
           <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : ''}`}>
             <div className={`inline-block px-4 py-3 rounded-2xl ${
               message.role === 'user'
-                ? 'bg-gradient-to-r from-primary-500 to-cyber-500 text-white'
+                ? 'bg-linear-to-r from-primary-500 to-cyber-500 text-white'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
             }`}>
               {renderContent(message.content)}
@@ -95,7 +95,7 @@ export default function MessageList({ messages, isLoading }) {
           animate={{ opacity: 1, y: 0 }}
           className="flex gap-3"
         >
-          <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500">
+          <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-linear-to-r from-purple-500 to-pink-500">
             <Bot className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">

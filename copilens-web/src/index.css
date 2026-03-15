@@ -1,6 +1,39 @@
 @import "tailwindcss";
 
-/* Base Styles */
+/* ============================================================
+   COPILENS BRAND TOKENS
+   Extracted from the hero "COPILENS" gradient:
+   C=#06b6d4 (cyan) → O=#14b8a6 (teal) → P/I=#3b82f6 (blue)
+   → L=#6366f1 (indigo) → E/N=#9333ea (purple) → S=#7c3aed (violet)
+   ============================================================ */
+:root {
+  --brand-cyan: #06b6d4;
+  --brand-teal: #14b8a6;
+  --brand-blue: #3b82f6;
+  --brand-indigo: #6366f1;
+  --brand-purple: #9333ea;
+  --brand-violet: #7c3aed;
+
+  /* Gradient shorthand */
+  --brand-gradient: linear-gradient(to right,
+      var(--brand-cyan),
+      var(--brand-teal),
+      var(--brand-blue),
+      var(--brand-purple),
+      var(--brand-violet));
+  --brand-gradient-br: linear-gradient(to bottom right,
+      var(--brand-cyan),
+      var(--brand-blue),
+      var(--brand-violet));
+
+  /* Glow colors */
+  --glow-start: rgba(6, 182, 212, 0.5);
+  --glow-end: rgba(147, 51, 234, 0.5);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
 body {
   background-color: white;
   color: #111827;
@@ -9,18 +42,47 @@ body {
 }
 
 body.dark {
-  background-color: #030712;
-  color: #f3f4f6;
+  background-color: #0f172a;
+  color: #e2e8f0;
 }
 
-/* Utility Classes */
+/* ============================================================
+   BRAND UTILITIES
+   ============================================================ */
+
+/* The signature COPILENS text gradient */
+.text-brand {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: var(--brand-gradient);
+}
+
+/* Legacy alias used throughout the app */
 .text-gradient {
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  background-image: linear-gradient(to right, #0ea5e9, #06b6d4, #9333ea);
+  background-image: var(--brand-gradient);
 }
 
+/* Brand background gradient */
+.bg-brand {
+  background-image: var(--brand-gradient);
+}
+
+.bg-brand-br {
+  background-image: var(--brand-gradient-br);
+}
+
+/* Brand glow border — kept for reference, not applied by default */
+.glow-border {
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+/* ============================================================
+   GLASS
+   ============================================================ */
 .glass {
   background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(16px);
@@ -33,42 +95,48 @@ body.dark {
   border-color: rgba(55, 65, 81, 0.2);
 }
 
-.glow-border {
-  border: 2px solid rgba(14, 165, 233, 0.5);
-  box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
-}
-
-/* Cursor Styles */
-a, button, .cursor-pointer {
+/* ============================================================
+   CURSOR
+   ============================================================ */
+a,
+button,
+.cursor-pointer {
   cursor: pointer !important;
 }
 
-a:hover, button:hover {
+a:hover,
+button:hover {
   cursor: pointer !important;
 }
 
-input, textarea {
+input,
+textarea {
   cursor: text !important;
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: #9ca3af !important;
 }
 
-.dark input::placeholder, .dark textarea::placeholder {
+.dark input::placeholder,
+.dark textarea::placeholder {
   color: #6b7280 !important;
 }
 
-/* Fix input text color */
-input, textarea {
+input,
+textarea {
   color: #111827 !important;
 }
 
-.dark input, .dark textarea {
+.dark input,
+.dark textarea {
   color: #f3f4f6 !important;
 }
 
-/* Custom Scrollbar */
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -90,21 +158,168 @@ input, textarea {
   background-color: #374151;
 }
 
-/* Hover Effects */
+/* ============================================================
+   HOVER EFFECTS
+   ============================================================ */
 .hover-lift {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
+  /* glow removed */
 }
 
-/* Link Styles */
+/* ============================================================
+   ANIMATED BUTTON
+   ============================================================ */
+.ui-anim-btn {
+  --padding: 4px;
+  --radius: 24px;
+  --transition: 0.4s;
+  --highlight: hsl(var(--highlight-hue), 100%, 70%);
+  --highlight-50: hsla(var(--highlight-hue), 100%, 70%, 0.5);
+  --highlight-30: hsla(var(--highlight-hue), 100%, 70%, 0.3);
+  --highlight-20: hsla(var(--highlight-hue), 100%, 70%, 0.2);
+  --highlight-80: hsla(var(--highlight-hue), 100%, 70%, 0.8);
+  background: hsl(220, 20%, 14%);
+  box-shadow:
+    inset 0px 1px 1px rgba(255, 255, 255, 0.2),
+    inset 0px 2px 2px rgba(255, 255, 255, 0.15),
+    inset 0px 4px 4px rgba(255, 255, 255, 0.1),
+    0 -1px 1px rgba(0, 0, 0, 0.02),
+    0 -4px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ui-anim-btn::before {
+  content: "";
+  position: absolute;
+  top: calc(0px - var(--padding));
+  left: calc(0px - var(--padding));
+  width: calc(100% + var(--padding) * 2);
+  height: calc(100% + var(--padding) * 2);
+  border-radius: calc(var(--radius) + var(--padding));
+  pointer-events: none;
+  background-image: linear-gradient(0deg, #0004, #000a);
+  z-index: -1;
+  transition: box-shadow var(--transition);
+  box-shadow: 0 -8px 8px -6px #0000 inset, 1px 1px 1px #fff2, -1px -1px 1px #0002;
+}
+
+.ui-anim-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: linear-gradient(0deg, #fff, var(--highlight), var(--highlight-50), 8%, transparent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.ui-anim-letter {
+  color: rgba(255, 255, 255, 0.75);
+  animation: ui-letter-anim 2s ease-in-out infinite;
+  transition: color var(--transition);
+}
+
+@keyframes ui-letter-anim {
+  50% {
+    text-shadow: 0 0 3px #fff8;
+    color: #fff;
+  }
+}
+
+.ui-anim-btn-svg {
+  animation: ui-flicker 2s linear infinite;
+  animation-delay: 0.5s;
+}
+
+@keyframes ui-flicker {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.ui-anim-btn:hover {
+  border-color: hsla(var(--highlight-hue), 100%, 80%, 0.4);
+}
+
+.ui-anim-btn:hover::before {
+  box-shadow:
+    0 -8px 8px -6px #fffa inset,
+    0 -16px 16px -8px var(--highlight-30) inset,
+    1px 1px 1px #fff2, -1px -1px 1px #0002;
+}
+
+.ui-anim-btn:hover::after {
+  opacity: 1;
+  -webkit-mask-image: linear-gradient(0deg, #fff, transparent);
+  mask-image: linear-gradient(0deg, #fff, transparent);
+}
+
+.ui-anim-btn:active {
+  border-color: hsla(var(--highlight-hue), 100%, 80%, 0.7);
+}
+
+.ui-anim-btn:active::after {
+  opacity: 1;
+  -webkit-mask-image: linear-gradient(0deg, #fff, transparent);
+  mask-image: linear-gradient(0deg, #fff, transparent);
+  filter: brightness(200%);
+}
+
+.ui-anim-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ui-anim-letter:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.ui-anim-letter:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.ui-anim-letter:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.ui-anim-letter:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+.ui-anim-letter:nth-child(5) {
+  animation-delay: 0.32s;
+}
+
+.ui-anim-letter:nth-child(6) {
+  animation-delay: 0.40s;
+}
+
+.ui-anim-letter:nth-child(7) {
+  animation-delay: 0.48s;
+}
+
+.ui-anim-letter:nth-child(8) {
+  animation-delay: 0.56s;
+}
+
+.ui-anim-letter:nth-child(9) {
+  animation-delay: 0.64s;
+}
+
+.ui-anim-letter:nth-child(10) {
+  animation-delay: 0.72s;
+}
+
+/* ============================================================
+   MISC
+   ============================================================ */
 a {
   transition: color 0.2s ease, opacity 0.2s ease;
 }
@@ -113,7 +328,6 @@ a:hover {
   opacity: 0.8;
 }
 
-/* Button Styles */
 button {
   transition: all 0.2s ease;
 }

@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import { GitCommit, Sparkles, FileText, Users, GitBranch, Code } from 'lucide-react';
 
@@ -60,16 +61,16 @@ export default function StatsCards({ data }) {
           className={`glass ${stat.bgColor} p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50 relative overflow-hidden`}
         >
           {/* Background Gradient */}
-          <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-5`}></div>
+          <div className={`absolute inset-0 bg-linear-to-br ${stat.color} opacity-5`}></div>
 
           {/* Content */}
           <div className="relative z-10">
             <div className="flex items-start justify-between mb-4">
-              <div className={`p-3 rounded-lg bg-gradient-to-br ${stat.color}`}>
+              <div className={`p-3 rounded-lg bg-linear-to-br ${stat.color}`}>
                 <stat.icon className="w-6 h-6 text-white" />
               </div>
               {stat.badge && (
-                <span className={`px-3 py-1 rounded-full bg-gradient-to-r ${stat.color} text-white text-sm font-semibold`}>
+                <span className={`px-3 py-1 rounded-full bg-linear-to-r ${stat.color} text-white text-sm font-semibold`}>
                   {stat.badge}
                 </span>
               )}
@@ -84,7 +85,7 @@ export default function StatsCards({ data }) {
 
           {/* Animated Border */}
           <motion.div
-            className={`absolute inset-0 rounded-xl bg-gradient-to-r ${stat.color} opacity-0`}
+            className={`absolute inset-0 rounded-xl bg-linear-to-r ${stat.color} opacity-0`}
             whileHover={{ opacity: 0.1 }}
             transition={{ duration: 0.3 }}
           />

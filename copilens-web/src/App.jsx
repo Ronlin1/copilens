@@ -1,10 +1,16 @@
 import { useState, lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon, Sparkles, BarChart3, Rocket, Home, Terminal, Menu, X, Zap, Info } from 'lucide-react';
+import { Sparkles, BarChart3, Rocket, Home, Terminal, Menu, X, Zap, Info } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
+import Footer from './components/Footer';
 import { ENV } from './config/env';
+import { DashboardPreview } from './components/ui/DashboardPreview';
+import { AnimatedButton } from './components/ui/AnimatedButton';
+import { cn } from './utils/cn';
+
+import { AnimatedGridPattern } from './components/ui/AnimatedGridPattern';
 
 // Lazy load pages for code splitting
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -40,141 +46,131 @@ function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden">
-      
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-1/4 -left-20 w-96 h-96 bg-primary-500 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1
-          }}
-          className="absolute bottom-1/4 -right-20 w-96 h-96 bg-cyber-500 rounded-full blur-3xl"
+    <div className="relative w-full overflow-hidden font-light text-white antialiased">
+
+      {/* Grid confined to hero viewport only */}
+      <div className="absolute inset-x-0 top-0 h-screen pointer-events-none overflow-hidden">
+        <AnimatedGridPattern
+          numSquares={30}
+          maxOpacity={0.25}
+          duration={3}
+          repeatDelay={1}
+          className={cn(
+            'mask-[radial-gradient(600px_circle_at_50%_40%,white,transparent)]',
+            'inset-x-0 inset-y-[-30%] h-[200%] skew-y-12'
+          )}
         />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 text-center max-w-4xl mx-auto">
-        
-        {/* Logo */}
-        <motion.div
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8"
-        >
-          <div className="text-6xl md:text-8xl font-bold flex items-center justify-center gap-4">
-            <Zap className="w-16 h-16 md:w-20 md:h-20 text-primary-500 animate-pulse" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-500 via-cyan-500 to-purple-600">
-              COPILENS
-            </span>
-          </div>
-        </motion.div>
+      {/* ── Hero text block ── */}
+      <div className="container relative z-10 mx-auto max-w-2xl px-4 pt-24 pb-0 text-center md:max-w-5xl md:px-6 lg:max-w-7xl">
 
-        {/* Tagline */}
-        <motion.p
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-12 font-light"
-        >
-          AI-Powered Repository Analysis & Deployment
-        </motion.p>
-
-        {/* Search Bar */}
         <motion.div
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="max-w-2xl mx-auto mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="flex flex-col items-center"
         >
-          <div className="bg-white/10 dark:bg-gray-900/50 backdrop-blur-lg border-2 border-primary-500/50 rounded-2xl p-2 shadow-[0_0_20px_rgba(14,165,233,0.3)] hover-glow">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                placeholder="Paste repository URL (GitHub/GitLab/Bitbucket)..."
-                value={repoUrl}
-                onChange={(e) => setRepoUrl(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="flex-1 px-6 py-4 bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-500 cursor-text"
-              />
-              <button 
-                onClick={handleAnalyze}
-                disabled={!repoUrl.trim()}
-                className="px-8 py-4 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105 w-full sm:w-auto cursor-pointer hover-lift disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                <Sparkles className="w-5 h-5 inline mr-2" />
-                Analyze
-              </button>
+          {/* Title - Widened container to prevent squeezing */}
+          <h1 className="mx-auto mb-4 max-w-5xl text-4xl font-bold leading-tight md:text-6xl lg:text-7xl text-white tracking-tight">
+            Analyze Smarter with <span className="text-brand">AI-Powered</span> Code Insights
+          </h1>
+
+          {/* Subtitle - More descriptive, readable width */}
+          <p className="mx-auto mb-8 max-w-3xl text-lg font-medium text-white/60 md:text-xl leading-relaxed">
+            Copilens acts as an AI accountability layer, bringing transparency and trust to your AI-generated code changes.
+          </p>
+
+          {/* Search bar */}
+          <div id="repo-search" className="mb-8 max-w-3xl w-full">
+            <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-2 shadow-2xl shadow-brand/5">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="Paste repository URL..."
+                  value={repoUrl}
+                  onChange={(e) => setRepoUrl(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="flex-1 px-6 py-4 bg-transparent outline-none text-white placeholder-white/30 cursor-text"
+                />
+                <AnimatedButton
+                  label="Analyze"
+                  labelActive="Analyzing..."
+                  icon={Sparkles}
+                  hue={200}
+                  disabled={!repoUrl.trim()}
+                  onClick={handleAnalyze}
+                />
+              </div>
+            </div>
+            
+            {/* Progress Bar Detail */}
+            <div className="mt-6 flex flex-col items-center">
+              <div className="w-full max-w-xl h-1 bg-white/5 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className="h-full bg-brand"
+                />
+              </div>
+              <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold">
+                System Status: Ready for Analysis
+              </p>
             </div>
           </div>
         </motion.div>
 
-        {/* Feature Cards */}
+        {/* ── Dashboard screenshot ── */}
         <motion.div
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          className="relative mb-24"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease: 'easeOut' }}
         >
+          <div className="relative z-10 mx-auto max-w-5xl px-4">
+            <div className="rounded-3xl overflow-hidden border border-white/10 bg-slate-900/40 backdrop-blur-3xl shadow-[0_0_80px_-20px_rgba(30,58,138,0.4)]">
+              <DashboardPreview />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── Features Section (The "Details") ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-16">
           {[
-            {
-              icon: Sparkles,
-              title: 'AI Detection',
-              description: 'Detect AI-generated code with advanced ML models',
-              gradient: 'from-purple-500 to-pink-500'
+            { 
+              title: "Smart Patterns", 
+              desc: "Automatically detect signature patterns of AI-generated code vs human contributions.",
+              icon: Sparkles
             },
-            {
-              icon: BarChart3,
-              title: 'Deep Analytics',
-              description: 'Comprehensive insights into your codebase',
-              gradient: 'from-blue-500 to-cyan-500'
+            { 
+              title: "Risk Scoring", 
+              desc: "Measure cyclomatic complexity shifts to identify potential technical debt introduced by LLMs.",
+              icon: Zap
             },
-            {
-              icon: Rocket,
-              title: 'Auto Deploy',
-              description: 'Deploy to cloud platforms with one click',
-              gradient: 'from-orange-500 to-red-500'
+            { 
+              title: "Native Integration", 
+              desc: "Works directly with your Git workflow to provide accountability inside your CI/CD pipeline.",
+              icon: Terminal
             }
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.8 + index * 0.1 }}
-              whileHover={{ scale: 1.05, y: -5 }}
-              className="bg-white/10 dark:bg-gray-900/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/20 p-6 rounded-xl cursor-pointer hover:border-primary-500/50 transition-all"
+          ].map((feature, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="group p-8 rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm text-left hover:bg-white/10 hover:border-white/10 transition-all duration-300"
             >
-              <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${feature.gradient} mb-4`}>
-                <feature.icon className="w-6 h-6 text-white" />
+              <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center mb-6 shadow-xl shadow-brand/10 transition-transform group-hover:scale-110">
+                <feature.icon className="w-7 h-7 text-cyan-400 filter drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                {feature.description}
-              </p>
+              <h3 className="text-xl font-bold text-white mb-3 group-hover:text-brand transition-colors">{feature.title}</h3>
+              <p className="text-white/50 leading-relaxed font-medium">{feature.desc}</p>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
 
       </div>
     </div>
@@ -200,8 +196,10 @@ function Navigation() {
           
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <Zap className="w-6 h-6 text-primary-500" />
-            <span className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary-500 via-cyan-500 to-purple-600">
+            <div className="p-1 rounded-lg bg-brand">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-black text-brand">
               COPILENS
             </span>
           </Link>
@@ -214,14 +212,36 @@ function Navigation() {
                 to={link.to}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                   location.pathname === link.to
-                    ? 'bg-gradient-to-r from-primary-500 to-cyber-500 text-white'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-white/20 dark:hover:bg-gray-800/50'
+                    ? 'bg-brand/10 text-brand border border-brand/20'
+                    : 'text-gray-400 hover:text-white hover:bg-white/10'
                 }`}
               >
                 <link.icon className="w-4 h-4" />
-                <span className="font-medium">{link.label}</span>
+                <span className="font-medium text-sm">{link.label}</span>
               </Link>
             ))}
+          </div>
+
+          {/* Desktop CTA Buttons */}
+          <div className="hidden md:flex items-center gap-4 ml-4">
+            <Link
+                to="/about"
+                className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+            >
+              Learn how it works
+            </Link>
+            <button
+                onClick={() => {
+                  if (location.pathname === '/') {
+                    document.getElementById('repo-search')?.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    window.location.href = '/#repo-search';
+                  }
+                }}
+                className="bg-brand-br hover:opacity-90 text-white text-sm font-bold px-5 py-2 rounded-full transition-all active:scale-95 shadow-lg shadow-brand/20"
+            >
+              Get Started
+            </button>
           </div>
           
 
@@ -251,14 +271,37 @@ function Navigation() {
                     onClick={() => setIsMenuOpen(false)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                       location.pathname === link.to
-                        ? 'bg-gradient-to-r from-primary-500 to-cyber-500 text-white'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-white/20 dark:hover:bg-gray-800/50'
+                        ? 'bg-brand/10 text-brand border border-brand/20'
+                        : 'text-gray-400 hover:text-white hover:bg-white/10'
                     }`}
                   >
                     <link.icon className="w-4 h-4" />
                     <span className="font-medium">{link.label}</span>
                   </Link>
                 ))}
+                
+                <div className="pt-4 mt-4 border-t border-white/10 space-y-3">
+                  <Link
+                    to="/about"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block text-center text-gray-400 font-medium py-2"
+                  >
+                    Learn how it works
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      if (location.pathname === '/') {
+                        document.getElementById('repo-search')?.scrollIntoView({ behavior: 'smooth' });
+                      } else {
+                        window.location.href = '/#repo-search';
+                      }
+                    }}
+                    className="w-full bg-brand-br text-white font-bold py-3 rounded-xl shadow-lg"
+                  >
+                    Get Started
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}
@@ -277,7 +320,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+        <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-300">
           
           <Navigation />
           
@@ -299,6 +342,8 @@ function App() {
               <FloatingChatButton />
             </Suspense>
           )}
+
+          <Footer />
         </div>
       </Router>
     </ErrorBoundary>

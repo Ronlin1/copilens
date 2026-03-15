@@ -72,7 +72,7 @@ export default function ProgressNotifications({ logs }) {
               <div className="relative overflow-hidden rounded-xl backdrop-blur-xl bg-gray-900/80 border border-gray-700/50 shadow-2xl">
                 {/* Animated gradient border */}
                 <motion.div
-                  className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-20`}
+                  className={`absolute inset-0 bg-linear-to-r ${gradient} opacity-20`}
                   animate={{
                     backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                   }}
@@ -86,7 +86,7 @@ export default function ProgressNotifications({ logs }) {
                 
                 {/* Shine effect */}
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+                  className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent"
                   animate={{
                     x: ['-100%', '200%'],
                   }}
@@ -102,7 +102,7 @@ export default function ProgressNotifications({ logs }) {
                   {/* Icon with animated glow */}
                   <div className="relative">
                     <motion.div
-                      className={`absolute inset-0 bg-gradient-to-r ${gradient} blur-xl opacity-50`}
+                      className={`absolute inset-0 bg-linear-to-r ${gradient} blur-xl opacity-50`}
                       animate={{
                         scale: [1, 1.2, 1],
                         opacity: [0.5, 0.8, 0.5],
@@ -112,7 +112,7 @@ export default function ProgressNotifications({ logs }) {
                         repeat: Infinity,
                       }}
                     />
-                    <div className={`relative p-2 rounded-lg bg-gradient-to-br ${gradient}`}>
+                    <div className={`relative p-2 rounded-lg bg-linear-to-br ${gradient}`}>
                       {isCompleted ? (
                         <Icon className="w-5 h-5 text-white" />
                       ) : (
@@ -168,7 +168,7 @@ export default function ProgressNotifications({ logs }) {
                         transition={{ delay: 0.3 }}
                       >
                         <motion.div
-                          className={`h-full bg-gradient-to-r ${gradient}`}
+                          className={`h-full bg-linear-to-r ${gradient}`}
                           initial={{ width: "0%" }}
                           animate={{ width: "100%" }}
                           transition={{ 
@@ -207,7 +207,7 @@ export default function ProgressNotifications({ logs }) {
                     {[...Array(6)].map((_, i) => (
                       <motion.div
                         key={i}
-                        className={`absolute w-1 h-1 rounded-full bg-gradient-to-r ${gradient}`}
+                        className={`absolute w-1 h-1 rounded-full bg-linear-to-r ${gradient}`}
                         initial={{ 
                           x: '50%', 
                           y: '50%',

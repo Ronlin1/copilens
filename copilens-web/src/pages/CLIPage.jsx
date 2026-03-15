@@ -34,20 +34,26 @@ export default function CLIPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <h1 className="text-5xl font-bold text-gradient mb-4">
-            Copilens CLI
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <Terminal className="w-16 h-16 text-primary-500 animate-pulse" />
+            <h1 className="text-6xl font-bold text-cyan-400">
+              CLI TOOL
+            </h1>
+          </div>
+          <p className="text-2xl text-gray-700 dark:text-gray-300 mb-4 font-light">
             Powerful AI-powered code analysis from your terminal
+          </p>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+            The Copilens CLI brings advanced machine learning insights directly to your development workflow. Scan repositories, detect AI-generated patterns, and analyze complexity with simple commands.
           </p>
         </motion.div>
 
@@ -62,7 +68,7 @@ export default function CLIPage() {
               className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50"
             >
               <div className="flex items-start gap-4">
-                <div className="p-3 rounded-lg bg-gradient-to-r from-primary-500 to-cyber-500">
+                <div className="p-3 rounded-lg bg-linear-to-r from-primary-500 to-cyber-500">
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
@@ -89,7 +95,7 @@ export default function CLIPage() {
           className="glass p-8 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50 mb-12"
         >
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500">
+            <div className="p-2 rounded-lg bg-linear-to-r from-purple-500 to-pink-500">
               <Terminal className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -111,7 +117,7 @@ export default function CLIPage() {
                 transition={{ delay: 0.6 + index * 0.1 }}
                 className="flex items-start gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
-                <code className="flex-shrink-0 px-3 py-1 bg-gray-900 text-green-400 rounded font-mono text-sm">
+                <code className="shrink-0 px-3 py-1 bg-gray-900 text-green-400 rounded font-mono text-sm">
                   {item.cmd}
                 </code>
                 <p className="text-gray-700 dark:text-gray-300 mt-1">
@@ -134,7 +140,7 @@ export default function CLIPage() {
             {
               icon: BookOpen,
               title: 'AI-Powered',
-              desc: 'Gemini AI integration for insights',
+              desc: 'Llama AI integration for insights',
               color: 'from-blue-500 to-cyan-500'
             },
             {
@@ -152,7 +158,7 @@ export default function CLIPage() {
               whileHover={{ scale: 1.05 }}
               className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50 text-center"
             >
-              <div className={`inline-flex p-4 rounded-full bg-gradient-to-r ${feature.color} mb-4`}>
+              <div className={`inline-flex p-4 rounded-full bg-linear-to-r ${feature.color} mb-4`}>
                 <feature.icon className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">

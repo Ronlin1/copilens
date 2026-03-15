@@ -6,11 +6,14 @@ export default defineConfig({
   css: {
     postcss: './postcss.config.js'
   },
-  preview: {
+  optimizeDeps: {
+    include: ['groq-sdk'],
+  },
   build: {
     chunkSizeWarningLimit: 1000,
     sourcemap: false,
   },
+  preview: {
     host: true,
     port: process.env.PORT || 5173,
     allowedHosts: true

@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Sparkles } from 'lucide-react';
@@ -23,7 +24,7 @@ export default function AIDetectionChart({ data }) {
       className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+        <div className="p-2 rounded-lg bg-linear-to-br from-purple-500 to-pink-500">
           <Sparkles className="w-5 h-5 text-white" />
         </div>
         <div>

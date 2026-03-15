@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import { Zap, Sparkles, BarChart3, Rocket, Code2, Shield, Cpu, Globe, Mail, ExternalLink, AlertCircle, Clock } from 'lucide-react';
 
@@ -6,7 +7,7 @@ export default function AboutPage() {
     {
       icon: Sparkles,
       title: 'AI-Powered Code Detection',
-      description: 'Advanced machine learning models detect AI-generated code patterns with high accuracy using Google Gemini 3 Pro.',
+      description: 'Advanced machine learning models detect AI-generated code patterns with high accuracy using Llama via Groq.',
       gradient: 'from-purple-500 to-pink-500'
     },
     {
@@ -60,7 +61,7 @@ export default function AboutPage() {
     {
       icon: Clock,
       title: 'Rate Limits',
-      description: 'GitHub API and Gemini API rate limits may affect analysis speed for very large repositories.'
+      description: 'GitHub API and Groq API rate limits may affect analysis speed for very large repositories.'
     }
   ];
 
@@ -76,7 +77,7 @@ export default function AboutPage() {
   ];
 
   const techStack = [
-    { name: 'Google Gemini 3 Pro', desc: 'AI-powered code analysis and insights' },
+    { name: 'Llama 3.3 70B (Groq)', desc: 'AI-powered code analysis and insights' },
     { name: 'GitHub REST API', desc: 'Repository data and statistics' },
     { name: 'React 18', desc: 'Modern, fast user interface' },
     { name: 'Vite', desc: 'Lightning-fast development and builds' },
@@ -85,7 +86,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         {/* Header */}
@@ -96,7 +97,7 @@ export default function AboutPage() {
         >
           <div className="flex items-center justify-center gap-4 mb-6">
             <Zap className="w-16 h-16 text-primary-500 animate-pulse" />
-            <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-500 via-cyan-500 to-purple-600">
+            <h1 className="text-6xl font-bold text-cyan-400">
               COPILENS
             </h1>
           </div>
@@ -128,7 +129,7 @@ export default function AboutPage() {
                 whileHover={{ scale: 1.05, y: -5 }}
                 className="glass p-6 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer"
               >
-                <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${feature.gradient} mb-4`}>
+                <div className={`inline-flex p-3 rounded-lg bg-linear-to-r ${feature.gradient} mb-4`}>
                   <feature.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -142,37 +143,52 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        {/* How It Works */}
+        {/* How It Works (Tutorial Steps) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
           className="mb-20"
         >
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center uppercase tracking-widest">
             How It Works
           </h2>
-          <div className="glass p-8 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              {[
-                { num: '1', title: 'Enter URL', desc: 'Paste any public GitHub repository URL' },
-                { num: '2', title: 'AI Analysis', desc: 'Gemini 3 Pro analyzes code patterns and quality' },
-                { num: '3', title: 'Get Insights', desc: 'View complexity, risks, and AI detection results' },
-                { num: '4', title: 'Deploy', desc: 'See detected configs and deployment options' }
-              ].map((step, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-cyber-500 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                    {step.num}
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {step.desc}
-                  </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { 
+                num: '01', 
+                title: 'Connect Repository', 
+                desc: 'Paste your public GitHub repository link into the analyzer to begin the scanning process.',
+                icon: Globe
+              },
+              { 
+                num: '02', 
+                title: 'AI Analysis', 
+                desc: 'Our AI accountability layer scans your diffs, detecting patterns and measuring cyclomatic complexity shifts.',
+                icon: Cpu
+              },
+              { 
+                num: '03', 
+                title: 'Insights & Reporting', 
+                desc: 'Receive a comprehensive breakdown of AI vs Human contributions and identify potential code risks.',
+                icon: BarChart3
+              }
+            ].map((step, index) => (
+              <div key={index} className="glass p-8 rounded-3xl border border-gray-200 dark:border-gray-700 relative overflow-hidden group hover:border-brand/50 transition-colors">
+                <div className="absolute -right-4 -top-4 text-8xl font-black text-white/5 dark:text-white/5 select-none transition-transform group-hover:scale-110">
+                  {step.num}
                 </div>
-              ))}
-            </div>
+                <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center mb-6 shadow-xl shadow-brand/5">
+                  <step.icon className="w-7 h-7 text-cyan-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                  {step.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                  {step.desc}
+                </p>
+              </div>
+            ))}
           </div>
         </motion.div>
 
@@ -251,7 +267,7 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {upcoming.map((feature, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary-500 to-cyber-500" />
+                  <div className="w-2 h-2 rounded-full bg-linear-to-r from-primary-500 to-cyber-500" />
                   <p className="text-gray-700 dark:text-gray-300">
                     {feature}
                   </p>
@@ -279,7 +295,7 @@ export default function AboutPage() {
               href="https://atuhaire.com/connect"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105"
             >
               <Mail className="w-6 h-6" />
               Connect with Me
