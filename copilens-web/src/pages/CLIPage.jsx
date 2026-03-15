@@ -134,7 +134,7 @@ export default function CLIPage() {
             {
               icon: BookOpen,
               title: 'AI-Powered',
-              desc: 'Gemini AI integration for insights',
+              desc: 'Llama AI integration for insights',
               color: 'from-blue-500 to-cyan-500'
             },
             {

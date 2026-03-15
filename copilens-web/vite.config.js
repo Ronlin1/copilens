@@ -6,11 +6,11 @@ export default defineConfig({
   css: {
     postcss: './postcss.config.js'
   },
-  preview: {
   build: {
     chunkSizeWarningLimit: 1000,
     sourcemap: false,
   },
+  preview: {
     host: true,
     port: process.env.PORT || 5173,
     allowedHosts: true

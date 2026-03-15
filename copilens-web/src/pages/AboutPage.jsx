@@ -6,7 +6,7 @@ export default function AboutPage() {
     {
       icon: Sparkles,
       title: 'AI-Powered Code Detection',
-      description: 'Advanced machine learning models detect AI-generated code patterns with high accuracy using Google Gemini 3 Pro.',
+      description: 'Advanced machine learning models detect AI-generated code patterns with high accuracy using Llama via Groq.',
       gradient: 'from-purple-500 to-pink-500'
     },
     {
@@ -60,7 +60,7 @@ export default function AboutPage() {
     {
       icon: Clock,
       title: 'Rate Limits',
-      description: 'GitHub API and Gemini API rate limits may affect analysis speed for very large repositories.'
+      description: 'GitHub API and Groq API rate limits may affect analysis speed for very large repositories.'
     }
   ];
 
@@ -76,7 +76,7 @@ export default function AboutPage() {
   ];
 
   const techStack = [
-    { name: 'Google Gemini 3 Pro', desc: 'AI-powered code analysis and insights' },
+    { name: 'Llama 3.3 70B (Groq)', desc: 'AI-powered code analysis and insights' },
     { name: 'GitHub REST API', desc: 'Repository data and statistics' },
     { name: 'React 18', desc: 'Modern, fast user interface' },
     { name: 'Vite', desc: 'Lightning-fast development and builds' },
@@ -156,7 +156,7 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {[
                 { num: '1', title: 'Enter URL', desc: 'Paste any public GitHub repository URL' },
-                { num: '2', title: 'AI Analysis', desc: 'Gemini 3 Pro analyzes code patterns and quality' },
+                { num: '2', title: 'AI Analysis', desc: 'Llama 3.3 analyzes code patterns and quality' },
                 { num: '3', title: 'Get Insights', desc: 'View complexity, risks, and AI detection results' },
                 { num: '4', title: 'Deploy', desc: 'See detected configs and deployment options' }
               ].map((step, index) => (

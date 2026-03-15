@@ -1,38 +1,43 @@
-import { GoogleGenAI } from '@google/genai';
+import Groq from 'groq-sdk';
 import { ENV } from '../config/env';
 
-class GeminiService {
+class GroqService {
   constructor() {
-    this.ai = null;
-    this.model = 'gemini-3-flash-preview';
-    this.proModel = 'gemini-3-pro-preview'; // For deeper analysis
+    this.client = null;
+    this.model = 'llama-3.3-70b-versatile';
+    this.proModel = 'llama-3.3-70b-versatile';
   }
 
   initialize() {
-    if (!ENV.GEMINI_API_KEY) {
-      throw new Error('Gemini API key not configured. Please add your API key to the .env file.');
+    if (!ENV.GROQ_API_KEY) {
+      throw new Error('Groq API key not configured. Please add VITE_GROQ_API_KEY to your .env file.');
     }
-    
-    this.ai = new GoogleGenAI({
-      apiKey: ENV.GEMINI_API_KEY,
+    this.client = new Groq({
+      apiKey: ENV.GROQ_API_KEY,
+      dangerouslyAllowBrowser: true,
     });
   }
 
-  async analyzeRepository(repoData) {
-    if (!this.ai) {
-      this.initialize();
-    }
+  async _complete(messages, { temperature = 0.3, maxTokens = 4096, model } = {}) {
+    if (!this.client) this.initialize();
+    const response = await this.client.chat.completions.create({
+      model: model || this.model,
+      messages,
+      temperature,
+      max_tokens: maxTokens,
+    });
+    return response.choices[0]?.message?.content || '';
+  }
 
+  async analyzeRepository(repoData) {
     const { repoInfo, stats, languages, commits, fileContents, tree } = repoData;
 
-    // Create comprehensive file statistics
     const totalLines = fileContents.reduce((sum, f) => sum + (f.lines || 0), 0);
     const totalFilesAnalyzed = fileContents.length;
-    const avgFileSize = fileContents.length > 0 
+    const avgFileSize = fileContents.length > 0
       ? Math.round(fileContents.reduce((sum, f) => sum + f.size, 0) / fileContents.length)
       : 0;
 
-    // Group files by extension for better analysis
     const filesByExtension = {};
     fileContents.forEach(f => {
       const ext = f.path.split('.').pop();
@@ -40,10 +45,8 @@ class GeminiService {
       filesByExtension[ext].push(f);
     });
 
-    // Prepare comprehensive code samples (intelligently select diverse files)
     const codeSamples = [];
     Object.entries(filesByExtension).forEach(([ext, files]) => {
-      // Take 2-3 files per file type to get diverse coverage
       const samplesToTake = Math.min(3, files.length);
       files.slice(0, samplesToTake).forEach(f => {
         codeSamples.push({
@@ -51,7 +54,6 @@ class GeminiService {
           extension: ext,
           size: f.size,
           lines: f.lines,
-          // Send first 3000 chars for analysis to avoid token limits
           preview: f.content.substring(0, 3000)
         });
       });
@@ -76,70 +78,27 @@ COMPREHENSIVE STATISTICS:
 - Code Files Analyzed: ${totalFilesAnalyzed} (${totalLines.toLocaleString()} lines)
 - Average File Size: ${(avgFileSize / 1024).toFixed(1)}KB
 - Repository Size: ${Math.round(stats.totalSize / 1024)}KB
-- Total Lines Added: ${stats.totalLinesAdded?.toLocaleString() || 'N/A'}
-- Total Lines Deleted: ${stats.totalLinesDeleted?.toLocaleString() || 'N/A'}
 
 LANGUAGES USED (by size):
 ${Object.entries(languages)
-  .sort(([,a], [,b]) => b - a)
-  .map(([lang, bytes]) => `- ${lang}: ${Math.round(bytes / 1024)}KB (${((bytes / stats.totalSize) * 100).toFixed(1)}%)`)
-  .join('\n')}
+        .sort(([, a], [, b]) => b - a)
+        .map(([lang, bytes]) => `- ${lang}: ${Math.round(bytes / 1024)}KB (${((bytes / stats.totalSize) * 100).toFixed(1)}%)`)
+        .join('\n')}
 
 FILE TYPE DISTRIBUTION:
 ${Object.entries(filesByExtension)
-  .sort(([,a], [,b]) => b.length - a.length)
-  .map(([ext, files]) => `- .${ext}: ${files.length} files (${files.reduce((sum, f) => sum + (f.lines || 0), 0).toLocaleString()} lines)`)
-  .join('\n')}
+        .sort(([, a], [, b]) => b.length - a.length)
+        .map(([ext, files]) => `- .${ext}: ${files.length} files (${files.reduce((sum, f) => sum + (f.lines || 0), 0).toLocaleString()} lines)`)
+        .join('\n')}
 
 RECENT COMMITS (Last ${Math.min(commits.length, 10)}):
 ${commits.slice(0, 10).map(c => `- ${c.commit.message.split('\n')[0]} (by ${c.commit.author.name})`).join('\n')}
 
 CODE SAMPLES FROM ${codeSamples.length} DIVERSE FILES:
 ${codeSamples.map(f => `
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📄 File: ${f.path}
-📊 Stats: ${f.lines} lines, ${(f.size / 1024).toFixed(1)}KB
-🔤 Type: .${f.extension}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+--- File: ${f.path} (${f.lines} lines, .${f.extension}) ---
 ${f.preview}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-`).join('\n')}
-
-ANALYSIS REQUIRED:
-
-1. **AI-Generated Code Detection**:
-   - Analyze code patterns, comments, and structure
-   - Look for signs of AI assistance (consistent patterns, placeholder comments, boilerplate code)
-   - Estimate percentage of AI-generated vs human-written code (0-100%)
-   - Identify specific files that appear AI-generated
-   - Consider: GitHub Copilot patterns, ChatGPT code style, generic variable names
-
-2. **Code Quality Assessment**:
-   - Overall code quality score (1-10)
-   - Code organization and structure
-   - Documentation quality
-   - Testing practices
-   - Error handling patterns
-   - Security considerations
-
-3. **Technology Stack Analysis**:
-   - Primary technologies and frameworks
-   - Architecture pattern (MVC, microservices, monolith, etc.)
-   - Database usage
-   - API design patterns
-   - Build tools and deployment setup
-
-4. **Project Health Metrics**:
-   - Activity level (active, moderate, dormant)
-   - Contributor engagement
-   - Code churn analysis
-   - Maintenance status
-
-5. **Recommendations**:
-   - Top 5 improvement suggestions
-   - Security concerns
-   - Performance optimization opportunities
-   - Best practices to adopt
+---`).join('\n')}
 
 Provide your analysis in the following JSON format:
 {
@@ -181,36 +140,18 @@ Provide your analysis in the following JSON format:
 IMPORTANT: Return ONLY valid JSON, no markdown formatting or additional text.`;
 
     try {
-      const response = await this.ai.models.generateContentStream({
-        model: this.model,
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        config: {
-          temperature: 0.3,
-          maxOutputTokens: 4096,
-        }
-      });
+      const fullText = await this._complete(
+        [{ role: 'user', content: prompt }],
+        { temperature: 0.3, maxTokens: 4096 }
+      );
 
-      let fullText = '';
-      for await (const chunk of response) {
-        if (chunk.text) {
-          fullText += chunk.text;
-        }
-      }
-
-      // Try to parse JSON from the response
-      let jsonMatch = fullText.match(/\{[\s\S]*\}/);
+      const jsonMatch = fullText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
       }
 
-      // If no JSON found, return structured error
       return {
-        aiDetection: {
-          percentage: 0,
-          confidence: 'low',
-          indicators: ['Analysis failed - please try again'],
-          aiGeneratedFiles: []
-        },
+        aiDetection: { percentage: 0, confidence: 'low', indicators: ['Analysis failed - please try again'], aiGeneratedFiles: [] },
         codeQuality: { score: 0, strengths: [], weaknesses: [], documentation: 'unknown', testing: 'unknown' },
         techStack: { primary: [], architecture: 'unknown', frameworks: [], buildTools: [] },
         projectHealth: { activityLevel: 'unknown', lastCommitDays: 0, contributorActivity: 'unknown', maintenanceStatus: 'unknown' },
@@ -218,17 +159,13 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting or additional text.`;
         summary: 'Analysis could not be completed. Please try again.'
       };
     } catch (error) {
-      console.error('Gemini analysis error:', error);
+      console.error('Groq analysis error:', error);
       throw new Error('Failed to analyze repository: ' + error.message);
     }
   }
 
   async chat(messages, repoContext = null) {
-    if (!this.ai) {
-      this.initialize();
-    }
-
-    let systemPrompt = `You are Copilens AI, a friendly and knowledgeable code analysis assistant. Your responses should be conversational, clear, and natural - like talking to a helpful colleague.
+    let systemContent = `You are Copilens AI, a friendly and knowledgeable code analysis assistant. Your responses should be conversational, clear, and natural - like talking to a helpful colleague.
 
 IMPORTANT RESPONSE STYLE:
 - Write in natural, flowing prose without markdown formatting
@@ -236,85 +173,55 @@ IMPORTANT RESPONSE STYLE:
 - Do NOT use bullet points, numbered lists, or special formatting
 - Use plain text only - write complete sentences and paragraphs
 - Be conversational and warm in tone, like explaining to a friend
-- When mentioning code, just describe it naturally in sentences
 - Keep responses concise but informative (2-4 sentences unless detailed explanation needed)
 
 Your role is to help developers understand their repositories, detect patterns, provide insights, and answer technical questions about the codebase.`;
-    
+
     if (repoContext) {
-      systemPrompt += `\n\nYou have analyzed this repository:\n`;
-      systemPrompt += `Repository: ${repoContext.name}\n`;
-      systemPrompt += `Description: ${repoContext.description}\n`;
-      systemPrompt += `Primary Languages: ${repoContext.languages}\n`;
-      systemPrompt += `Total Commits: ${repoContext.totalCommits}\n`;
-      systemPrompt += `Contributors: ${repoContext.contributors}\n`;
-      systemPrompt += `AI Detection: ${repoContext.aiDetection}% of code appears to be AI-generated\n`;
-      systemPrompt += `Code Quality Score: ${repoContext.codeQuality}/10\n`;
-      
-      if (repoContext.analysis) {
-        systemPrompt += `\nYou have access to detailed code analysis including complexity metrics, architecture patterns, and risk assessments. Use this information to provide specific, actionable insights when asked.`;
-      }
-      
+      systemContent += `\n\nYou have analyzed this repository:
+Repository: ${repoContext.name}
+Description: ${repoContext.description}
+Primary Languages: ${repoContext.languages}
+Total Commits: ${repoContext.totalCommits}
+Contributors: ${repoContext.contributors}
+AI Detection: ${repoContext.aiDetection}% of code appears to be AI-generated
+Code Quality Score: ${repoContext.codeQuality}/10`;
+
       if (repoContext.deploymentOptions) {
         const availablePlatforms = Object.entries(repoContext.deploymentOptions)
-          .filter(([_, config]) => config.available)
+          .filter(([, config]) => config.available)
           .map(([platform]) => platform);
         if (availablePlatforms.length > 0) {
-          systemPrompt += `\n\nDeployment configurations detected: ${availablePlatforms.join(', ')}. You can discuss deployment options if asked.`;
+          systemContent += `\n\nDeployment configurations detected: ${availablePlatforms.join(', ')}.`;
         }
       }
     }
 
-    const conversationHistory = messages.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }]
-    }));
-
-    const contents = [
-      { role: 'user', parts: [{ text: systemPrompt }] },
-      { role: 'model', parts: [{ text: 'I understand. I have the complete repository context and I will provide helpful, conversational responses without any markdown formatting. What would you like to know about the codebase?' }] },
-      ...conversationHistory
+    const groqMessages = [
+      { role: 'system', content: systemContent },
+      ...messages.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      }))
     ];
 
     try {
-      const response = await this.ai.models.generateContentStream({
-        model: this.model,
-        contents,
-        config: {
-          temperature: 0.7,
-          maxOutputTokens: 2048,
-        }
-      });
-
-      let fullText = '';
-      for await (const chunk of response) {
-        if (chunk.text) {
-          fullText += chunk.text;
-        }
-      }
-
-      return fullText || 'I apologize, but I could not generate a response. Please try again.';
+      const text = await this._complete(groqMessages, { temperature: 0.7, maxTokens: 2048 });
+      return text || 'I apologize, but I could not generate a response. Please try again.';
     } catch (error) {
-      if (!ENV.IS_PRODUCTION) {
-        console.error('Gemini API error:', error);
-      }
+      if (!ENV.IS_PRODUCTION) console.error('Groq API error:', error);
       throw new Error('Failed to get AI response: ' + error.message);
     }
   }
 
   async generateArchitecture(githubData) {
     try {
-      console.log('🏗️ Generating system architecture with Gemini...');
-      
-      if (!this.ai) {
-        this.initialize();
-      }
+      console.log('🏗️ Generating system architecture with Llama...');
 
-      // Prepare data for architecture analysis
       const languagesInfo = Object.entries(githubData.languages || {})
         .map(([lang, bytes]) => `${lang}: ${bytes} bytes`)
         .join('\n');
-      
+
       const fileStructure = githubData.tree
         ?.filter(f => f.type === 'blob')
         .slice(0, 50)
@@ -345,44 +252,30 @@ ${f.content.substring(0, 1000)}
 \`\`\`
 `).join('\n') || 'No code samples available'}
 
-Please generate a detailed technical architecture document including:
+Generate a detailed technical architecture document covering:
+1. Architecture Overview (pattern: MVC, microservices, monolith, etc.)
+2. Technology Stack breakdown
+3. System Components and responsibilities
+4. Data Flow
+5. Key Design Patterns
+6. Infrastructure Requirements
+7. Security Considerations
+8. Performance Characteristics
+9. Scalability Analysis
+10. Technical Debt & Recommendations
 
-1. **Architecture Overview**: High-level architecture pattern (MVC, microservices, monolith, etc.)
-2. **Technology Stack**: Detailed breakdown of technologies, frameworks, and libraries
-3. **System Components**: Main components/modules and their responsibilities
-4. **Data Flow**: How data moves through the system
-5. **Key Design Patterns**: Identified design patterns used
-6. **Infrastructure Requirements**: Deployment, scaling, and infrastructure needs
-7. **Security Considerations**: Authentication, authorization, data protection
-8. **Performance Characteristics**: Expected performance profile and bottlenecks
-9. **Scalability Analysis**: How the system scales (horizontal/vertical)
-10. **Technical Debt & Recommendations**: Areas for improvement
+Format in Markdown with clear headings. Make it professional and suitable for technical documentation.`;
 
-Format your response in Markdown with clear headings, bullet points, and code references where appropriate.
-Make it professional and suitable for technical documentation.`;
+      const architecture = await this._complete(
+        [{ role: 'user', content: prompt }],
+        { temperature: 0.7, maxTokens: 4096 }
+      );
 
-      const response = await this.ai.models.generateContent({
-        model: this.model,
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        config: {
-          temperature: 0.7,
-          maxOutputTokens: 4096,
-        }
-      });
-
-      let architecture = '';
-      for await (const chunk of response) {
-        if (chunk.text) {
-          architecture += chunk.text;
-        }
-      }
-      
       console.log('✅ Architecture generated successfully');
-      
       return {
         architecture: architecture || 'Failed to generate architecture',
         generatedAt: new Date().toISOString(),
-        modelUsed: 'gemini-3-flash-preview'
+        modelUsed: this.model
       };
     } catch (error) {
       console.error('❌ Architecture generation failed:', error);
@@ -394,280 +287,55 @@ Make it professional and suitable for technical documentation.`;
   }
 
   async generateArchitectureDoc(repoData) {
+    // Groq/Llama does not support image generation — go straight to text analysis
+    console.log('📝 Generating text-based architecture analysis with Llama...');
     try {
-      console.log('🎨 Generating architecture diagram with Gemini Image...');
-      
-      if (!this.ai) {
-        this.initialize();
-      }
-
-      // Get detailed repo info
-      const languages = Array.isArray(repoData.languages) 
+      const languages = Array.isArray(repoData.languages)
         ? repoData.languages.slice(0, 5).map(l => l.name).join(', ')
         : Object.keys(repoData.languages || {}).slice(0, 5).join(', ');
-      
-      const repoName = repoData.repoInfo?.name || 'Application';
-      const description = repoData.repoInfo?.description || 'No description';
-      const stars = repoData.repoInfo?.stargazers_count || 0;
-      const fileCount = repoData.tree?.length || 0;
 
-      // Extract key architecture files
-      const keyFiles = repoData.tree?.slice(0, 50)
-        .map(f => f.path || f)
-        .filter(path => 
-          path.includes('config') || 
-          path.includes('server') || 
-          path.includes('api') || 
-          path.includes('database') ||
-          path.includes('service') ||
-          path.includes('controller') ||
-          path.includes('model') ||
-          path.includes('router') ||
-          path.includes('index') ||
-          path.includes('main') ||
-          path.includes('app')
-        ) || [];
+      const files = repoData.tree?.slice(0, 30).map(f => f.path || f).join('\n') || 'No files';
 
-      // Create detailed architecture diagram prompt
-      const imagePrompt = `Generate a professional, detailed software architecture diagram for the "${repoName}" repository.
+      const prompt = `Analyze this repository's architecture in detail:
 
-**Repository Information:**
-- Name: ${repoName}
-- Description: ${description}
-- Primary Technologies: ${languages}
-- Total Files: ${fileCount}
-- GitHub Stars: ${stars}
+Repository: ${repoData.repoInfo?.name || 'Unknown'}
+Description: ${repoData.repoInfo?.description || 'No description'}
+Languages: ${languages}
+Total Files: ${repoData.tree?.length || 0}
 
-**Key Architecture Files Detected:**
-${keyFiles.slice(0, 20).join('\n') || 'Standard project structure'}
-
-**Diagram Requirements:**
-
-Create a modern, professional technical architecture diagram that shows:
-
-1. **SYSTEM LAYERS** (show these as distinct horizontal layers):
-   - Presentation Layer (UI/Frontend)
-   - Application Layer (Business Logic)
-   - Data Layer (Database/Storage)
-   - External Services (APIs, Third-party integrations)
-
-2. **COMPONENT BREAKDOWN**:
-   - Frontend components and frameworks (${languages.split(',')[0] || 'main tech'})
-   - Backend services and APIs
-   - Database systems
-   - Authentication & Authorization modules
-   - External integrations
-
-3. **DATA FLOW**:
-   - Show arrows indicating request/response flow
-   - Show data movement between components
-   - Indicate synchronous vs asynchronous communication
-
-4. **TECHNOLOGY STACK**:
-   - Label each component with the technology used
-   - Show frameworks, libraries, and tools
-   - Include deployment/infrastructure elements
-
-5. **VISUAL STYLE**:
-   - Use a clean, modern technical diagram aesthetic (like AWS or Azure architecture diagrams)
-   - Professional color scheme: blues (#3B82F6), purples (#8B5CF6), greens (#10B981), oranges (#F59E0B)
-   - Clear component boxes with rounded corners
-   - Distinct layers with different background shades
-   - Bold, readable labels and text
-   - Directional arrows showing flow
-   - Icons or symbols for different component types
-   - Grid-based layout for alignment
-
-6. **QUALITY**:
-   - High resolution, crisp and clear
-   - Well-organized and balanced layout
-   - Professional presentation quality
-   - Suitable for technical documentation
-
-Make it look like a professional architecture diagram from a technical design document. The diagram should be comprehensive, visually appealing, and technically accurate based on the repository structure and technologies used.`;
-
-      console.log('📤 Requesting architecture diagram from Gemini...');
-      
-      const tools = [
-        {
-          googleSearch: {}
-        }
-      ];
-
-      const config = {
-        imageConfig: {
-          aspectRatio: "16:9",
-          imageSize: "1K",
-        },
-        responseModalities: ['IMAGE', 'TEXT'],
-        tools,
-      };
-
-      const contents = [
-        {
-          role: 'user',
-          parts: [{ text: imagePrompt }],
-        },
-      ];
-
-      const response = await this.ai.models.generateContentStream({
-        model: 'gemini-3-pro-image-preview',
-        config,
-        contents,
-      });
-
-      console.log('📥 Processing response stream...');
-      
-      let imageData = null;
-      let mimeType = null;
-      let textContent = '';
-
-      for await (const chunk of response) {
-        if (!chunk.candidates || !chunk.candidates[0]?.content || !chunk.candidates[0]?.content?.parts) {
-          continue;
-        }
-        
-        // Check for inline image data
-        if (chunk.candidates[0].content.parts[0]?.inlineData) {
-          const inlineData = chunk.candidates[0].content.parts[0].inlineData;
-          imageData = inlineData.data;
-          mimeType = inlineData.mimeType || 'image/png';
-          console.log('📷 Image data received:', mimeType);
-        } else if (chunk.text) {
-          textContent += chunk.text;
-          console.log('💬 Text chunk received');
-        }
-      }
-
-      if (imageData) {
-        console.log('✅ Architecture diagram image generated successfully');
-        
-        // Also generate text analysis in parallel
-        console.log('📝 Generating text analysis...');
-        let textData = textContent; // Use any text from image response
-        
-        // If no text came with image, generate separate text analysis
-        if (!textData || textData.trim().length < 100) {
-          try {
-            const languages = Array.isArray(repoData.languages) 
-              ? repoData.languages.slice(0, 5).map(l => l.name).join(', ')
-              : Object.keys(repoData.languages || {}).slice(0, 5).join(', ');
-            
-            const files = repoData.tree?.slice(0, 30).map(f => f.path || f).join('\n') || 'No files';
-
-            const textPrompt = `Analyze this repository's architecture in detail:
-
-**Repository:** ${repoData.repoInfo?.name || 'Unknown'}
-**Description:** ${repoData.repoInfo?.description || 'No description'}
-**Languages:** ${languages}
-**Total Files:** ${repoData.tree?.length || 0}
-
-**Key Files:**
+Key Files:
 ${files}
 
 Provide a comprehensive architecture analysis covering:
-1. **Architecture Pattern** (MVC, Microservices, Monolith, etc.)
-2. **System Components** (Frontend, Backend, Database, APIs, etc.)
-3. **Technology Stack** (Frameworks, libraries, tools used)
-4. **Data Flow** (How data moves through the system)
-5. **Key Features** (Main capabilities)
-6. **Deployment Strategy** (How it should be deployed)
+1. Architecture Pattern (MVC, Microservices, Monolith, etc.)
+2. System Components (Frontend, Backend, Database, APIs, etc.)
+3. Technology Stack (Frameworks, libraries, tools used)
+4. Data Flow (How data moves through the system)
+5. Key Features (Main capabilities)
+6. Deployment Strategy (How it should be deployed)
 
 Make it detailed, professional, and technical. Format in markdown.`;
 
-            const textResponse = await this.ai.models.generateContent({
-              model: this.model,
-              contents: [{ role: 'user', parts: [{ text: textPrompt }] }],
-              config: {
-                temperature: 0.7,
-                maxOutputTokens: 2048,
-              }
-            });
+      const text = await this._complete(
+        [{ role: 'user', content: prompt }],
+        { temperature: 0.7, maxTokens: 2048 }
+      );
 
-            textData = textResponse.text || textResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          } catch (textError) {
-            console.error('❌ Text generation failed:', textError);
-            textData = `# Architecture Analysis
-
-Image diagram generated successfully. Text analysis generation encountered an error.`;
-          }
-        }
-
-        const imageDataUrl = `data:${mimeType};base64,${imageData}`;
-        return { 
-          imageData: imageDataUrl,
-          textData: textData,
-          type: 'image' 
-        };
+      if (text && text.trim()) {
+        console.log('✅ Architecture analysis generated');
+        return { textData: text, imageData: null, type: 'text' };
       }
-
-      throw new Error('No image data in response');
-      
     } catch (error) {
-      console.error('❌ Image generation failed:', error.message);
-      console.log('📝 Falling back to text-based architecture analysis...');
-      
-      // Fallback: Generate text description with Gemini
-      try {
-        if (!this.ai) {
-          this.initialize();
-        }
+      console.error('❌ Architecture analysis failed:', error);
+    }
 
-        const languages = Array.isArray(repoData.languages) 
-          ? repoData.languages.slice(0, 5).map(l => `${l.name}`).join(', ')
-          : Object.keys(repoData.languages || {}).slice(0, 5).join(', ');
-        
-        const files = repoData.tree?.slice(0, 30).map(f => f.path || f).join('\n') || 'No files';
+    // Final fallback
+    const languages = Array.isArray(repoData.languages)
+      ? repoData.languages.slice(0, 3).map(l => l.name).join(', ')
+      : Object.keys(repoData.languages || {}).slice(0, 3).join(', ');
 
-        const prompt = `Analyze this repository's architecture in detail:
-
-**Repository:** ${repoData.repoInfo?.name || 'Unknown'}
-**Description:** ${repoData.repoInfo?.description || 'No description'}
-**Languages:** ${languages}
-**Total Files:** ${repoData.tree?.length || 0}
-
-**Key Files:**
-${files}
-
-Provide a comprehensive architecture analysis covering:
-1. **Architecture Pattern** (MVC, Microservices, Monolith, etc.)
-2. **System Components** (Frontend, Backend, Database, APIs, etc.)
-3. **Technology Stack** (Frameworks, libraries, tools used)
-4. **Data Flow** (How data moves through the system)
-5. **Key Features** (Main capabilities)
-6. **Deployment Strategy** (How it should be deployed)
-
-Make it detailed, professional, and technical. Format in markdown.`;
-
-        const response = await this.ai.models.generateContent({
-          model: this.model,
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          config: {
-            temperature: 0.7,
-            maxOutputTokens: 2048,
-          }
-        });
-
-        const text = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        
-        if (text && text.trim()) {
-          console.log('✅ Architecture analysis generated (text fallback)');
-          return { 
-            textData: text,
-            imageData: null,
-            type: 'text' 
-          };
-        }
-      } catch (textError) {
-        console.error('❌ Text generation also failed:', textError);
-      }
-      
-      // Final fallback: Return template description
-      const languages = Array.isArray(repoData.languages) 
-        ? repoData.languages.slice(0, 3).map(l => l.name).join(', ')
-        : Object.keys(repoData.languages || {}).slice(0, 3).join(', ');
-      
-      const description = `# Architecture Analysis: ${repoData.repoInfo?.name || 'Application'}
+    return {
+      textData: `# Architecture Analysis: ${repoData.repoInfo?.name || 'Application'}
 
 ## Technology Stack
 **Languages:** ${languages}
@@ -676,59 +344,24 @@ Make it detailed, professional, and technical. Format in markdown.`;
 
 ## System Architecture
 
-### Architecture Pattern
-This appears to be a modern application following industry best practices.
-
 ### Key Components
-
-#### 1. Frontend Layer
-- User interface and presentation logic
-- Built with ${languages}
-- Handles user interactions and display
-
-#### 2. Backend Services
-- Business logic and data processing
-- API endpoints for client communication
-- Authentication and authorization
-
-#### 3. Data Layer
-- Database for persistent storage
-- Caching mechanisms for performance
-- File storage and management
+1. **Frontend Layer** — User interface and presentation logic
+2. **Backend Services** — Business logic and API endpoints
+3. **Data Layer** — Database and persistent storage
 
 ### Data Flow
-1. User interacts with the frontend
-2. Frontend sends requests to backend APIs
-3. Backend processes business logic
-4. Data is fetched/stored in the database
-5. Response sent back to frontend
-6. UI updates to reflect changes
-
-### Deployment Recommendations
-- Use containerization (Docker) for consistency
-- Deploy frontend separately from backend
-- Use CI/CD pipeline for automated deployments
-- Implement monitoring and logging
-- Set up load balancing for scalability
+User → Frontend → Backend APIs → Database → Response → UI
 
 ---
-*Note: Architecture diagram generation is currently unavailable. This is a text-based analysis based on repository structure.*`;
-      
-      return { 
-        textData: description,
-        imageData: null,
-        type: 'text' 
-      };
-    }
+*Text-based analysis powered by Llama via Groq.*`,
+      imageData: null,
+      type: 'text'
+    };
   }
 
   async analyzeHighRiskFiles(riskFiles, repoData) {
     try {
-      console.log(`🔍 Analyzing ${riskFiles.length} high-risk files with Gemini Pro...`);
-      
-      if (!this.ai) {
-        this.initialize();
-      }
+      console.log(`🔍 Analyzing ${riskFiles.length} high-risk files with Llama...`);
 
       const filesAnalysis = riskFiles.map(f => ({
         path: f.path,
@@ -760,31 +393,23 @@ ${i + 1}. ${f.path}
 `).join('\n')}
 
 Provide a comprehensive analysis with:
-
-1. **Root Cause Analysis**: Why are these files high-risk? Common patterns?
-2. **Refactoring Strategy**: Specific step-by-step refactoring plan for top 3 files
-3. **Design Pattern Recommendations**: Which patterns would help?
-4. **Testing Strategy**: How to safely refactor these files?
-5. **Priority Ranking**: Which files to tackle first and why?
-6. **Quick Wins**: Simple changes that reduce risk significantly
-7. **Long-term Architecture**: How should this code be restructured?
+1. Root Cause Analysis
+2. Refactoring Strategy for top 3 files
+3. Design Pattern Recommendations
+4. Testing Strategy
+5. Priority Ranking
+6. Quick Wins
+7. Long-term Architecture recommendations
 
 Format as markdown with clear sections and code examples where relevant.`;
 
-      const response = await this.ai.models.generateContent({
-        model: this.proModel, // Use Pro model for deep analysis
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        config: {
-          temperature: 0.7,
-          maxOutputTokens: 4096, // More tokens for detailed analysis
-        }
-      });
+      const analysis = await this._complete(
+        [{ role: 'user', content: prompt }],
+        { temperature: 0.7, maxTokens: 4096, model: this.proModel }
+      );
 
-      const analysis = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      
       console.log('✅ High-risk file analysis complete');
       return analysis;
-      
     } catch (error) {
       console.error('❌ High-risk file analysis failed:', error);
       return `# High-Risk File Analysis
@@ -799,4 +424,4 @@ Please review these files manually for refactoring opportunities.`;
   }
 }
 
-export default new GeminiService();
+export default new GroqService();

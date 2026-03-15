@@ -8,7 +8,7 @@ export default function ChatWindow({ isOpen, onClose }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hello! I am your Copilens AI assistant powered by Gemini 3. Analyze a repository first, then I can help you understand the code, detect AI-generated patterns, discuss deployment options, and answer technical questions. How can I help you today?'
+      content: 'Hello! I am your Copilens AI assistant powered by Llama via Groq. Analyze a repository first, then I can help you understand the code, detect AI-generated patterns, discuss deployment options, and answer technical questions. How can I help you today?'
     }
   ]);
   const [input, setInput] = useState('');
@@ -73,7 +73,7 @@ export default function ChatWindow({ isOpen, onClose }) {
       setError(error.message);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `⚠️ ${error.message}\n\nPlease make sure you've analyzed a repository first and that your Gemini API key is configured.`
+        content: `⚠️ ${error.message}\n\nPlease make sure you've analyzed a repository first and that your Groq API key is configured.`
       }]);
       setIsLoading(false);
     }
