@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-import { Rocket, Cloud, Server, Code, PlayCircle, CheckCircle, XCircle, Loader, FileText, AlertCircle, ExternalLink } from 'lucide-react';
+import { Rocket, Cloud, Server, Code, PlayCircle, CheckCircle, XCircle, Loader, FileText, AlertCircle, ExternalLink, Zap, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function DeployPage() {
@@ -31,7 +31,7 @@ export default function DeployPage() {
     {
       id: 'vercel',
       name: 'Vercel',
-      icon: '▲',
+      icon: Zap,
       color: 'from-black to-gray-800',
       desc: 'Perfect for Next.js and React apps',
       get available() {
@@ -50,7 +50,7 @@ export default function DeployPage() {
     {
       id: 'netlify',
       name: 'Netlify',
-      icon: '◆',
+      icon: Globe,
       color: 'from-cyan-500 to-teal-500',
       desc: 'Ideal for static sites and JAMstack',
       get available() {
@@ -69,7 +69,7 @@ export default function DeployPage() {
     {
       id: 'railway',
       name: 'Railway',
-      icon: '🚂',
+      icon: Code,
       color: 'from-purple-500 to-pink-500',
       desc: 'Great for full-stack applications',
       get available() {
@@ -88,7 +88,7 @@ export default function DeployPage() {
     {
       id: 'heroku',
       name: 'Heroku',
-      icon: '⬢',
+      icon: Server,
       color: 'from-purple-600 to-indigo-600',
       desc: 'Classic PaaS for any language',
       get available() {
@@ -141,19 +141,22 @@ export default function DeployPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <h1 className="text-5xl font-bold text-gradient mb-4">
-            Deploy Your App
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
-            {sessionData ? `Deploy ${sessionData.repoName} to your favorite platform` : 'One-click deployment to your favorite platform'}
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <Rocket className="w-16 h-16 text-primary-500 animate-pulse" />
+            <h1 className="text-6xl font-bold text-cyan-400 uppercase">
+              Deploy
+            </h1>
+          </div>
+          <p className="text-2xl text-gray-700 dark:text-gray-300 mb-4 font-light">
+            {sessionData ? `Deploying ${sessionData.repoName}` : 'One-click deployment to your favorite platform'}
           </p>
           {!sessionData && (
             <div className="mt-6">
               <button
                 onClick={() => navigate('/')}
-                className="px-6 py-3 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+                className="px-8 py-3 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105"
               >
                 Analyze a Repository First
               </button>
@@ -203,9 +206,10 @@ export default function DeployPage() {
                     </div>
                   )}
                   
-                  <div className={`text-4xl mb-4 text-center p-4 rounded-lg bg-linear-to-r ${platform.color} text-white`}>
-                    {platform.icon}
+                  <div className={`flex items-center justify-center p-6 rounded-2xl bg-linear-to-r ${platform.color} text-white mb-6 shadow-xl`}>
+                    <platform.icon className="w-10 h-10" />
                   </div>
+ Sands
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center">
                     {platform.name}
                   </h3>

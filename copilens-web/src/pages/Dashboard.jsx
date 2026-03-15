@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { flushSync } from 'react-dom';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, BarChart3, Loader, Award, Rocket, FileText } from 'lucide-react';
@@ -133,7 +132,7 @@ export default function Dashboard() {
       if (packageJsonFile) {
         try {
           packageJson = JSON.parse(packageJsonFile.content);
-        } catch (e) {
+        } catch {
           console.warn('Could not parse package.json');
         }
       }
@@ -714,21 +713,17 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="text-center mb-16"
           >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 rounded-lg bg-linear-to-r from-primary-500 to-cyber-500">
-                <BarChart3 className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-                  {data.repoInfo?.name || 'Repository'}
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {data.repoInfo?.description || 'Repository Analysis'}
-                </p>
-              </div>
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <BarChart3 className="w-16 h-16 text-primary-500 animate-pulse" />
+              <h1 className="text-6xl font-bold text-cyan-400 uppercase tracking-tight">
+                {data.repoInfo?.name || 'Dashboard'}
+              </h1>
             </div>
+            <p className="text-2xl text-gray-700 dark:text-gray-300 mb-4 font-light">
+              {data.repoInfo?.description || 'Comprehensive Repository Analysis'}
+            </p>
           </motion.div>
 
           {/* Stats Cards */}

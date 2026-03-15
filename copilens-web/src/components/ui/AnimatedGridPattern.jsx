@@ -77,7 +77,7 @@ export function AnimatedGridPattern({
         'pointer-events-none absolute inset-0 h-full w-full',
         className
       )}
-      style={{ color: '#06b6d4' }}
+      style={{ color: '#1e3a4a' }}
       {...props}
     >
       <defs>

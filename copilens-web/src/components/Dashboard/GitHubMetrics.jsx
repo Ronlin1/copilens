@@ -1,5 +1,5 @@
 
-import { motion } from 'framer-motion';
+
 import { GitPullRequest, AlertCircle, Tag, Star, GitFork, Eye } from 'lucide-react';
 
 export default function GitHubMetrics({ stats, repoInfo }) {

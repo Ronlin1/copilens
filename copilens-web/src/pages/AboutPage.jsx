@@ -97,7 +97,7 @@ export default function AboutPage() {
         >
           <div className="flex items-center justify-center gap-4 mb-6">
             <Zap className="w-16 h-16 text-primary-500 animate-pulse" />
-            <h1 className="text-6xl font-bold text-brand">
+            <h1 className="text-6xl font-bold text-cyan-400">
               COPILENS
             </h1>
           </div>
@@ -143,37 +143,52 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        {/* How It Works */}
+        {/* How It Works (Tutorial Steps) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
           className="mb-20"
         >
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center uppercase tracking-widest">
             How It Works
           </h2>
-          <div className="glass p-8 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              {[
-                { num: '1', title: 'Enter URL', desc: 'Paste any public GitHub repository URL' },
-                { num: '2', title: 'AI Analysis', desc: 'Llama 3.3 analyzes code patterns and quality' },
-                { num: '3', title: 'Get Insights', desc: 'View complexity, risks, and AI detection results' },
-                { num: '4', title: 'Deploy', desc: 'See detected configs and deployment options' }
-              ].map((step, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-12 h-12 rounded-full bg-linear-to-r from-primary-500 to-cyber-500 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                    {step.num}
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {step.desc}
-                  </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { 
+                num: '01', 
+                title: 'Connect Repository', 
+                desc: 'Paste your public GitHub repository link into the analyzer to begin the scanning process.',
+                icon: Globe
+              },
+              { 
+                num: '02', 
+                title: 'AI Analysis', 
+                desc: 'Our AI accountability layer scans your diffs, detecting patterns and measuring cyclomatic complexity shifts.',
+                icon: Cpu
+              },
+              { 
+                num: '03', 
+                title: 'Insights & Reporting', 
+                desc: 'Receive a comprehensive breakdown of AI vs Human contributions and identify potential code risks.',
+                icon: BarChart3
+              }
+            ].map((step, index) => (
+              <div key={index} className="glass p-8 rounded-3xl border border-gray-200 dark:border-gray-700 relative overflow-hidden group hover:border-brand/50 transition-colors">
+                <div className="absolute -right-4 -top-4 text-8xl font-black text-white/5 dark:text-white/5 select-none transition-transform group-hover:scale-110">
+                  {step.num}
                 </div>
-              ))}
-            </div>
+                <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center mb-6 shadow-xl shadow-brand/5">
+                  <step.icon className="w-7 h-7 text-cyan-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                  {step.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                  {step.desc}
+                </p>
+              </div>
+            ))}
           </div>
         </motion.div>
 

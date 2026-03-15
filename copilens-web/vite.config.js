@@ -6,6 +6,9 @@ export default defineConfig({
   css: {
     postcss: './postcss.config.js'
   },
+  optimizeDeps: {
+    include: ['groq-sdk'],
+  },
   build: {
     chunkSizeWarningLimit: 1000,
     sourcemap: false,

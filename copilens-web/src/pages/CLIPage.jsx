@@ -41,13 +41,19 @@ export default function CLIPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <h1 className="text-5xl font-bold text-gradient mb-4">
-            Copilens CLI
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <Terminal className="w-16 h-16 text-primary-500 animate-pulse" />
+            <h1 className="text-6xl font-bold text-cyan-400">
+              CLI TOOL
+            </h1>
+          </div>
+          <p className="text-2xl text-gray-700 dark:text-gray-300 mb-4 font-light">
             Powerful AI-powered code analysis from your terminal
+          </p>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+            The Copilens CLI brings advanced machine learning insights directly to your development workflow. Scan repositories, detect AI-generated patterns, and analyze complexity with simple commands.
           </p>
         </motion.div>
 
@@ -111,7 +117,7 @@ export default function CLIPage() {
                 transition={{ delay: 0.6 + index * 0.1 }}
                 className="flex items-start gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
-                <code className="flex-shrink-0 px-3 py-1 bg-gray-900 text-green-400 rounded font-mono text-sm">
+                <code className="shrink-0 px-3 py-1 bg-gray-900 text-green-400 rounded font-mono text-sm">
                   {item.cmd}
                 </code>
                 <p className="text-gray-700 dark:text-gray-300 mt-1">

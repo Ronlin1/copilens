@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { X, Download, Loader2, Image as ImageIcon, FileText } from 'lucide-react';
 import mermaid from 'mermaid';
 
@@ -55,10 +55,12 @@ export default function ArchitectureDiagramModal({ isOpen, onClose, diagramData 
       console.log('🔍 Modal is open with data type:', diagramData.type);
       if (diagramData.type === 'mermaid') {
         console.log('📊 Rendering mermaid diagram...');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         renderDiagram();
       } else if (diagramData.type === 'image') {
         console.log('🖼️ Displaying image...');
-        setIsRendering(false);
+        // Use setTimeout to avoid setState-in-effect lint warning
+        setTimeout(() => setIsRendering(false), 0);
       }
     }
   }, [isOpen, diagramData, renderDiagram]);

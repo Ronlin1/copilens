@@ -174,6 +174,150 @@ textarea {
 }
 
 /* ============================================================
+   ANIMATED BUTTON
+   ============================================================ */
+.ui-anim-btn {
+  --padding: 4px;
+  --radius: 24px;
+  --transition: 0.4s;
+  --highlight: hsl(var(--highlight-hue), 100%, 70%);
+  --highlight-50: hsla(var(--highlight-hue), 100%, 70%, 0.5);
+  --highlight-30: hsla(var(--highlight-hue), 100%, 70%, 0.3);
+  --highlight-20: hsla(var(--highlight-hue), 100%, 70%, 0.2);
+  --highlight-80: hsla(var(--highlight-hue), 100%, 70%, 0.8);
+  background: hsl(220, 20%, 14%);
+  box-shadow:
+    inset 0px 1px 1px rgba(255, 255, 255, 0.2),
+    inset 0px 2px 2px rgba(255, 255, 255, 0.15),
+    inset 0px 4px 4px rgba(255, 255, 255, 0.1),
+    0 -1px 1px rgba(0, 0, 0, 0.02),
+    0 -4px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ui-anim-btn::before {
+  content: "";
+  position: absolute;
+  top: calc(0px - var(--padding));
+  left: calc(0px - var(--padding));
+  width: calc(100% + var(--padding) * 2);
+  height: calc(100% + var(--padding) * 2);
+  border-radius: calc(var(--radius) + var(--padding));
+  pointer-events: none;
+  background-image: linear-gradient(0deg, #0004, #000a);
+  z-index: -1;
+  transition: box-shadow var(--transition);
+  box-shadow: 0 -8px 8px -6px #0000 inset, 1px 1px 1px #fff2, -1px -1px 1px #0002;
+}
+
+.ui-anim-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: linear-gradient(0deg, #fff, var(--highlight), var(--highlight-50), 8%, transparent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.ui-anim-letter {
+  color: rgba(255, 255, 255, 0.75);
+  animation: ui-letter-anim 2s ease-in-out infinite;
+  transition: color var(--transition);
+}
+
+@keyframes ui-letter-anim {
+  50% {
+    text-shadow: 0 0 3px #fff8;
+    color: #fff;
+  }
+}
+
+.ui-anim-btn-svg {
+  animation: ui-flicker 2s linear infinite;
+  animation-delay: 0.5s;
+}
+
+@keyframes ui-flicker {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.ui-anim-btn:hover {
+  border-color: hsla(var(--highlight-hue), 100%, 80%, 0.4);
+}
+
+.ui-anim-btn:hover::before {
+  box-shadow:
+    0 -8px 8px -6px #fffa inset,
+    0 -16px 16px -8px var(--highlight-30) inset,
+    1px 1px 1px #fff2, -1px -1px 1px #0002;
+}
+
+.ui-anim-btn:hover::after {
+  opacity: 1;
+  -webkit-mask-image: linear-gradient(0deg, #fff, transparent);
+  mask-image: linear-gradient(0deg, #fff, transparent);
+}
+
+.ui-anim-btn:active {
+  border-color: hsla(var(--highlight-hue), 100%, 80%, 0.7);
+}
+
+.ui-anim-btn:active::after {
+  opacity: 1;
+  -webkit-mask-image: linear-gradient(0deg, #fff, transparent);
+  mask-image: linear-gradient(0deg, #fff, transparent);
+  filter: brightness(200%);
+}
+
+.ui-anim-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ui-anim-letter:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.ui-anim-letter:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.ui-anim-letter:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.ui-anim-letter:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+.ui-anim-letter:nth-child(5) {
+  animation-delay: 0.32s;
+}
+
+.ui-anim-letter:nth-child(6) {
+  animation-delay: 0.40s;
+}
+
+.ui-anim-letter:nth-child(7) {
+  animation-delay: 0.48s;
+}
+
+.ui-anim-letter:nth-child(8) {
+  animation-delay: 0.56s;
+}
+
+.ui-anim-letter:nth-child(9) {
+  animation-delay: 0.64s;
+}
+
+.ui-anim-letter:nth-child(10) {
+  animation-delay: 0.72s;
+}
+
+/* ============================================================
    MISC
    ============================================================ */
 a {

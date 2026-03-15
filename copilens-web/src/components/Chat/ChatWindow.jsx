@@ -68,7 +68,6 @@ export default function ChatWindow({ isOpen, onClose }) {
       setIsLoading(false);
 
     } catch (error) {
-      setError(error.message);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: `⚠️ ${error.message}\n\nPlease make sure you've analyzed a repository first and that your Groq API key is configured.`
