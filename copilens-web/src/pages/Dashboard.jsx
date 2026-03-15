@@ -14,7 +14,8 @@ import Toast from '../components/Toast';
 import ArchitectureDiagramModal from '../components/ArchitectureDiagramModal';
 import ErrorBoundary from '../components/ErrorBoundary';
 import githubService from '../services/github';
-import geminiService from '../services/gemini';
+import aiService from '../services/ai';
+import geminiImageService from '../services/gemini';
 import { analyzeRepositoryComplexity } from '../utils/complexity';
 import { analyzeSystemStructure, generateSystemsInsights } from '../utils/systemsThinking';
 import { detectDeploymentOptions, getRecommendedPlatform } from '../utils/deploymentDetection';
@@ -117,7 +118,7 @@ export default function Dashboard() {
       console.log(`✅ Identified ${systemsAnalysis.patterns.length} architecture patterns`);
 
       console.log('🤖 Running Gemini AI analysis...');
-      const aiAnalysis = await geminiService.analyzeRepository(githubData);
+      const aiAnalysis = await aiService.analyzeRepository(githubData);
       console.log(`✅ AI detection: ${aiAnalysis?.aiDetection?.percentage}% confidence`);
 
       console.log('💡 Generating systems thinking insights...');
@@ -155,7 +156,7 @@ export default function Dashboard() {
       let highRiskAnalysis = null;
       if (complexityData.topRiskyFiles && complexityData.topRiskyFiles.length > 0) {
         console.log(`🎯 Analyzing ${complexityData.topRiskyFiles.length} high-risk files with Gemini Pro...`);
-        highRiskAnalysis = await geminiService.analyzeHighRiskFiles(
+        highRiskAnalysis = await aiService.analyzeHighRiskFiles(
           complexityData.topRiskyFiles,
           githubData
         );
@@ -476,19 +477,30 @@ export default function Dashboard() {
 
   const handleGenerateArchitecture = async () => {
     setGeneratingArchitecture(true);
-    setError(null); // Clear any previous errors
+    setError(null);
     try {
-      console.log('🎨 Starting architecture generation with data:', data);
-      const doc = await geminiService.generateArchitectureDoc(data);
-      console.log('📊 Architecture doc received:', doc);
-      console.log('🔍 Opening modal with diagram type:', doc?.type);
+      console.log('🎨 Generating architecture diagram with Gemini...');
+      const doc = await geminiImageService.generateArchitectureImage(data);
+      console.log('📊 Architecture doc received:', doc?.type);
+
+      // If Gemini returned text-only, enrich with Groq text analysis
+      if (doc.type === 'text' && !doc.textData) {
+        const textDoc = await aiService.generateArchitectureDoc(data);
+        doc.textData = textDoc.textData;
+      }
+
       setArchitectureDoc(doc);
       setShowArchitectureModal(true);
-      console.log('✅ Modal should now be open');
-    } catch (err) {
-      console.error('Failed to generate architecture:', err);
-      alert(`Failed to generate architecture diagram: ${err.message}\n\nPlease check the console for details.`);
-      setError(`Failed to generate architecture: ${err.message}`);
+    } catch (geminiErr) {
+      console.warn('⚠️ Gemini image failed, falling back to Groq text:', geminiErr.message);
+      try {
+        const doc = await aiService.generateArchitectureDoc(data);
+        setArchitectureDoc(doc);
+        setShowArchitectureModal(true);
+      } catch (err) {
+        console.error('Failed to generate architecture:', err);
+        setError(`Failed to generate architecture: ${err.message}`);
+      }
     } finally {
       setGeneratingArchitecture(false);
     }
