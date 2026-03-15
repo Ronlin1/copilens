@@ -79,7 +79,7 @@ export default function FileExplorer({ files }) {
       className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500">
+        <div className="p-2 rounded-lg bg-linear-to-br from-green-500 to-emerald-500">
           <FolderTree className="w-5 h-5 text-white" />
         </div>
         <div>

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Shield, TrendingUp, Activity, Brain, Gauge } from 'lucide-react';
 
 export default function ComplexityMetrics({ data }) {
@@ -6,7 +6,7 @@ export default function ComplexityMetrics({ data }) {
     return null;
   }
 
-  const { complexityData, aiAnalysis } = data;
+  const { complexityData } = data;
 
   // Calculate overall scores
   const avgCyclomatic = complexityData?.averageCyclomatic || 0;

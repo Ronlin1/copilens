@@ -3,12 +3,12 @@
  * Based on Donella Meadows' "Thinking in Systems" framework
  */
 
-export function analyzeSystemStructure(fileTree, languages) {
+export function analyzeSystemStructure(fileTree) {
   const patterns = [];
   const recommendations = [];
   const dependencies = analyzeDependencies(fileTree);
   const structure = analyzeProjectStructure(fileTree);
-  
+
   // 1. ARCHITECTURE PATTERNS
   if (structure.hasMonorepo) {
     patterns.push({
@@ -19,7 +19,7 @@ export function analyzeSystemStructure(fileTree, languages) {
       risks: ['Build complexity', 'Tight coupling']
     });
   }
-  
+
   if (structure.hasMicroservices) {
     patterns.push({
       name: 'Microservices Pattern',
@@ -29,7 +29,7 @@ export function analyzeSystemStructure(fileTree, languages) {
       risks: ['Distributed complexity', 'Network overhead', 'Data consistency']
     });
   }
-  
+
   if (structure.hasLayeredArchitecture) {
     patterns.push({
       name: 'Layered Architecture',
@@ -39,7 +39,7 @@ export function analyzeSystemStructure(fileTree, languages) {
       risks: ['Layer coupling', 'Performance overhead']
     });
   }
-  
+
   if (structure.hasComponentBased) {
     patterns.push({
       name: 'Component-Based Architecture',
@@ -49,7 +49,7 @@ export function analyzeSystemStructure(fileTree, languages) {
       risks: ['Prop drilling', 'Component bloat']
     });
   }
-  
+
   // 2. QUALITY & RELIABILITY
   if (!structure.hasTests) {
     recommendations.push({
@@ -69,7 +69,7 @@ export function analyzeSystemStructure(fileTree, languages) {
       effort: 'Medium'
     });
   }
-  
+
   // 3. CI/CD & AUTOMATION
   if (!structure.hasCI) {
     recommendations.push({
@@ -81,7 +81,7 @@ export function analyzeSystemStructure(fileTree, languages) {
       leveragePoint: 'Multiplier for all development work'
     });
   }
-  
+
   // 4. DOCUMENTATION
   if (structure.docFiles < 3) {
     recommendations.push({
@@ -92,7 +92,7 @@ export function analyzeSystemStructure(fileTree, languages) {
       effort: 'Low'
     });
   }
-  
+
   // 5. DEPENDENCY MANAGEMENT
   if (dependencies.outdatedCount > 10) {
     recommendations.push({
@@ -104,7 +104,7 @@ export function analyzeSystemStructure(fileTree, languages) {
       leveragePoint: 'Prevents security vulnerabilities'
     });
   }
-  
+
   // 6. CODE ORGANIZATION
   if (structure.deepNesting > 6) {
     recommendations.push({
@@ -115,9 +115,9 @@ export function analyzeSystemStructure(fileTree, languages) {
       effort: 'Low'
     });
   }
-  
-  return { 
-    patterns, 
+
+  return {
+    patterns,
     recommendations,
     structure,
     dependencies
@@ -126,16 +126,16 @@ export function analyzeSystemStructure(fileTree, languages) {
 
 function analyzeProjectStructure(fileTree) {
   const paths = fileTree.map(f => f.path || f);
-  
+
   // Detect monorepo
   const packages = paths.filter(p => p.startsWith('packages/') || p.startsWith('apps/'));
   const hasMonorepo = packages.length > 0;
-  
+
   // Detect microservices
   const hasServices = paths.some(p => p.includes('services/'));
   const hasDocker = paths.some(p => p.includes('Dockerfile') || p.includes('docker-compose'));
   const hasMicroservices = hasServices && hasDocker;
-  
+
   // Detect layers
   const layers = [];
   if (paths.some(p => p.includes('controllers/'))) layers.push('Controllers');
@@ -144,36 +144,36 @@ function analyzeProjectStructure(fileTree) {
   if (paths.some(p => p.includes('services/'))) layers.push('Services');
   if (paths.some(p => p.includes('utils/') || p.includes('helpers/'))) layers.push('Utilities');
   const hasLayeredArchitecture = layers.length >= 3;
-  
+
   // Detect components
   const componentFiles = paths.filter(p => p.includes('components/'));
   const hasComponentBased = componentFiles.length > 5;
   const componentCount = componentFiles.length;
-  
+
   // Detect tests
   const testFiles = paths.filter(p => /\.(test|spec)\.(js|ts|jsx|tsx|py)$/.test(p));
   const hasTests = testFiles.length > 0;
   const testCoverage = (testFiles.length / paths.length) * 100;
-  
+
   // Detect CI/CD
-  const hasCI = paths.some(p => 
-    p.includes('.github/workflows') || 
-    p.includes('.gitlab-ci') || 
+  const hasCI = paths.some(p =>
+    p.includes('.github/workflows') ||
+    p.includes('.gitlab-ci') ||
     p.includes('Jenkinsfile') ||
     p.includes('.circleci')
   );
-  
+
   // Documentation
-  const docFiles = paths.filter(p => 
-    /\.(md|txt|rst)$/i.test(p) && 
+  const docFiles = paths.filter(p =>
+    /\.(md|txt|rst)$/i.test(p) &&
     !p.includes('node_modules') &&
     !p.includes('LICENSE')
   ).length;
-  
+
   // Deep nesting
   const depths = paths.map(p => (p.match(/\//g) || []).length);
   const deepNesting = Math.max(...depths, 0);
-  
+
   return {
     hasMonorepo,
     packages,
@@ -192,22 +192,22 @@ function analyzeProjectStructure(fileTree) {
 
 function analyzeDependencies(fileTree) {
   const paths = fileTree.map(f => f.path || f);
-  
+
   // Look for package managers
   const hasPackageJson = paths.some(p => p.endsWith('package.json'));
   const hasRequirementsTxt = paths.some(p => p.endsWith('requirements.txt'));
   const hasGoMod = paths.some(p => p.endsWith('go.mod'));
   const hasCargoToml = paths.some(p => p.endsWith('Cargo.toml'));
-  
+
   // Count lock files (indicator of dependency management)
-  const lockFiles = paths.filter(p => 
-    p.endsWith('package-lock.json') || 
-    p.endsWith('yarn.lock') || 
+  const lockFiles = paths.filter(p =>
+    p.endsWith('package-lock.json') ||
+    p.endsWith('yarn.lock') ||
     p.endsWith('pnpm-lock.yaml') ||
     p.endsWith('Pipfile.lock') ||
     p.endsWith('Cargo.lock')
   );
-  
+
   return {
     hasPackageManager: hasPackageJson || hasRequirementsTxt || hasGoMod || hasCargoToml,
     lockFilesCount: lockFiles.length,
@@ -217,7 +217,7 @@ function analyzeDependencies(fileTree) {
 
 export function generateSystemsInsights(repoData, complexityData) {
   const insights = [];
-  
+
   // LEVERAGE POINTS (High Impact, Strategic Interventions)
   if (complexityData.criticalRiskFileCount > 0) {
     insights.push({
@@ -235,7 +235,7 @@ export function generateSystemsInsights(repoData, complexityData) {
       effort: 'Medium-High'
     });
   }
-  
+
   if (complexityData.highRiskFileCount > complexityData.totalFilesAnalyzed * 0.2) {
     insights.push({
       type: 'Leverage Point - System-Wide',
@@ -252,7 +252,7 @@ export function generateSystemsInsights(repoData, complexityData) {
       effort: 'High'
     });
   }
-  
+
   // FEEDBACK LOOPS (Virtuous and Vicious Cycles)
   if (complexityData.averageCyclomatic > 15) {
     insights.push({
@@ -270,7 +270,7 @@ export function generateSystemsInsights(repoData, complexityData) {
       effort: 'Ongoing'
     });
   }
-  
+
   // SYSTEM BOUNDARIES & INTERFACES
   insights.push({
     type: 'System Boundary',
@@ -286,7 +286,7 @@ export function generateSystemsInsights(repoData, complexityData) {
     impact: 'Medium',
     effort: 'Medium'
   });
-  
+
   // DELAYS (Hidden in the System)
   if (complexityData.totalLines > 100000) {
     insights.push({
@@ -304,7 +304,7 @@ export function generateSystemsInsights(repoData, complexityData) {
       effort: 'High'
     });
   }
-  
+
   // RESILIENCE INDICATORS
   insights.push({
     type: 'Resilience Assessment',
@@ -325,6 +325,6 @@ export function generateSystemsInsights(repoData, complexityData) {
     impact: 'High',
     effort: 'Ongoing'
   });
-  
+
   return insights;
 }

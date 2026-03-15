@@ -502,14 +502,14 @@ export default function Dashboard() {
 
   if (!repoUrl) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-linear-to-r from-blue-500 to-purple-500 mb-6">
               <AlertCircle className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -520,7 +520,7 @@ export default function Dashboard() {
             </p>
             <a
               href="/"
-              className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105"
+              className="inline-flex items-center px-8 py-3 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105"
             >
               Go Home
             </a>
@@ -532,7 +532,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 flex items-center justify-center px-4">
         <div className="text-center max-w-2xl w-full">
           <motion.div
             animate={{ rotate: 360 }}
@@ -585,7 +585,7 @@ export default function Dashboard() {
                   >
                     {/* Animated gradient border glow */}
                     <motion.div
-                      className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-20`}
+                      className={`absolute inset-0 bg-linear-to-r ${gradient} opacity-20`}
                       animate={{
                         backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                       }}
@@ -599,7 +599,7 @@ export default function Dashboard() {
                     
                     {/* Shine effect */}
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                      className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent"
                       animate={{
                         x: ['-100%', '200%'],
                       }}
@@ -647,7 +647,7 @@ export default function Dashboard() {
                           <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className={`w-6 h-6 rounded-full bg-gradient-to-r ${gradient} flex items-center justify-center`}
+                            className={`w-6 h-6 rounded-full bg-linear-to-r ${gradient} flex items-center justify-center`}
                           >
                             <span className="text-white text-sm">✓</span>
                           </motion.div>
@@ -655,7 +655,7 @@ export default function Dashboard() {
                           <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            className={`w-6 h-6 rounded-full border-2 border-t-transparent bg-gradient-to-r ${gradient}`}
+                            className={`w-6 h-6 rounded-full border-2 border-t-transparent bg-linear-to-r ${gradient}`}
                             style={{ borderColor: 'rgba(255,255,255,0.3)' }}
                           />
                         )}
@@ -673,7 +673,7 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -691,7 +691,7 @@ export default function Dashboard() {
             </p>
             <a
               href="/"
-              className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105"
+              className="inline-flex items-center px-8 py-3 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105"
             >
               Try Another Repository
             </a>
@@ -707,7 +707,7 @@ export default function Dashboard() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           
           {/* Header */}
@@ -717,7 +717,7 @@ export default function Dashboard() {
             className="mb-8"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 rounded-lg bg-gradient-to-r from-primary-500 to-cyber-500">
+              <div className="p-3 rounded-lg bg-linear-to-r from-primary-500 to-cyber-500">
                 <BarChart3 className="w-8 h-8 text-white" />
               </div>
               <div>
@@ -895,7 +895,7 @@ export default function Dashboard() {
           >
             <button
               onClick={() => setShowToast(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
+              className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
             >
               <Award size={20} />
               View Recommendations
@@ -903,7 +903,7 @@ export default function Dashboard() {
             
             <button
               onClick={() => setShowDeployDialog(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-teal-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
+              className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-green-600 to-teal-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-teal-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
             >
               <Rocket size={20} />
               Deploy This Project
@@ -912,7 +912,7 @@ export default function Dashboard() {
             <button
               onClick={handleGenerateArchitecture}
               disabled={generatingArchitecture}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-semibold rounded-lg hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-orange-600 to-red-600 text-white font-semibold rounded-lg hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {generatingArchitecture ? (
                 <>
@@ -957,7 +957,7 @@ export default function Dashboard() {
               className="bg-gray-800 rounded-2xl p-8 max-w-lg w-full border border-gray-700 shadow-2xl"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-gradient-to-r from-green-600 to-teal-600 rounded-lg">
+                <div className="p-3 bg-linear-to-r from-green-600 to-teal-600 rounded-lg">
                   <Rocket className="text-white" size={28} />
                 </div>
                 <div>
@@ -990,7 +990,7 @@ export default function Dashboard() {
                     setShowDeployDialog(false);
                     navigate('/deploy');
                   }}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-teal-700 transition-all cursor-pointer"
+                  className="flex-1 px-4 py-3 bg-linear-to-r from-green-600 to-teal-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-teal-700 transition-all cursor-pointer"
                 >
                   Yes, Let's Deploy!
                 </button>

@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp } from 'lucide-react';
@@ -19,7 +20,7 @@ export default function CommitTimeline({ data }) {
       className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500">
+        <div className="p-2 rounded-lg bg-linear-to-br from-blue-500 to-cyan-500">
           <TrendingUp className="w-5 h-5 text-white" />
         </div>
         <div>

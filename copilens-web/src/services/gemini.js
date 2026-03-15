@@ -30,7 +30,7 @@ class GroqService {
   }
 
   async analyzeRepository(repoData) {
-    const { repoInfo, stats, languages, commits, fileContents, tree } = repoData;
+    const { repoInfo, stats, languages, commits, fileContents } = repoData;
 
     const totalLines = fileContents.reduce((sum, f) => sum + (f.lines || 0), 0);
     const totalFilesAnalyzed = fileContents.length;

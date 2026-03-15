@@ -20,7 +20,7 @@ class GitHubService {
   }
 
   parseGitHubUrl(url) {
-    const regex = /github\.com\/([^\/]+)\/([^\/]+)/;
+    const regex = /github\.com\/([^/]+)\/([^/]+)/;
     const match = url.match(regex);
     if (!match) throw new Error('Invalid GitHub URL');
     return {
@@ -412,7 +412,7 @@ class GitHubService {
       languages,
       tree,
       codeFrequency,
-      commitStats,
+      ,
       pullRequests,
       issues,
       releases

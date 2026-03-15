@@ -18,7 +18,7 @@ export default function FloatingChatButton() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-40 p-4 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-full shadow-2xl shadow-primary-500/50 hover:shadow-primary-500/70 transition-all"
+            className="fixed bottom-6 right-6 z-40 p-4 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-full shadow-2xl shadow-primary-500/50 hover:shadow-primary-500/70 transition-all"
           >
             <MessageCircle className="w-6 h-6" />
             

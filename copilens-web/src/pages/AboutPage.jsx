@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import { Zap, Sparkles, BarChart3, Rocket, Code2, Shield, Cpu, Globe, Mail, ExternalLink, AlertCircle, Clock } from 'lucide-react';
 
@@ -85,7 +86,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         {/* Header */}
@@ -96,7 +97,7 @@ export default function AboutPage() {
         >
           <div className="flex items-center justify-center gap-4 mb-6">
             <Zap className="w-16 h-16 text-primary-500 animate-pulse" />
-            <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-500 via-cyan-500 to-purple-600">
+            <h1 className="text-6xl font-bold text-brand">
               COPILENS
             </h1>
           </div>
@@ -128,7 +129,7 @@ export default function AboutPage() {
                 whileHover={{ scale: 1.05, y: -5 }}
                 className="glass p-6 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer"
               >
-                <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${feature.gradient} mb-4`}>
+                <div className={`inline-flex p-3 rounded-lg bg-linear-to-r ${feature.gradient} mb-4`}>
                   <feature.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -161,7 +162,7 @@ export default function AboutPage() {
                 { num: '4', title: 'Deploy', desc: 'See detected configs and deployment options' }
               ].map((step, index) => (
                 <div key={index} className="text-center">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-cyber-500 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                  <div className="w-12 h-12 rounded-full bg-linear-to-r from-primary-500 to-cyber-500 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
                     {step.num}
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
@@ -251,7 +252,7 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {upcoming.map((feature, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary-500 to-cyber-500" />
+                  <div className="w-2 h-2 rounded-full bg-linear-to-r from-primary-500 to-cyber-500" />
                   <p className="text-gray-700 dark:text-gray-300">
                     {feature}
                   </p>
@@ -279,7 +280,7 @@ export default function AboutPage() {
               href="https://atuhaire.com/connect"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105"
             >
               <Mail className="w-6 h-6" />
               Connect with Me

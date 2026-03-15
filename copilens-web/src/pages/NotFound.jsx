@@ -11,7 +11,7 @@ export default function NotFound() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="text-9xl font-bold bg-gradient-to-r from-primary-500 to-cyber-500 bg-clip-text text-transparent mb-4">
+          <div className="text-9xl font-bold bg-linear-to-r from-primary-500 to-cyber-500 bg-clip-text text-transparent mb-4">
             404
           </div>
           

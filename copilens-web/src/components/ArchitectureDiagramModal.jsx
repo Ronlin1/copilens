@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Loader2, Image as ImageIcon, FileText } from 'lucide-react';
 import mermaid from 'mermaid';
@@ -22,20 +22,7 @@ export default function ArchitectureDiagramModal({ isOpen, onClose, diagramData 
     });
   }, []);
 
-  useEffect(() => {
-    if (isOpen && diagramData) {
-      console.log('🔍 Modal is open with data type:', diagramData.type);
-      if (diagramData.type === 'mermaid') {
-        console.log('📊 Rendering mermaid diagram...');
-        renderDiagram();
-      } else if (diagramData.type === 'image') {
-        console.log('🖼️ Displaying image...');
-        setIsRendering(false);
-      }
-    }
-  }, [isOpen, diagramData]);
-
-  const renderDiagram = async () => {
+  const renderDiagram = useCallback(async () => {
     if (!mermaidRef.current || !diagramData) return;
 
     setIsRendering(true);
@@ -61,7 +48,20 @@ export default function ArchitectureDiagramModal({ isOpen, onClose, diagramData 
       setError('Failed to render diagram. The generated code may be invalid.');
       setIsRendering(false);
     }
-  };
+  }, [diagramData]);
+
+  useEffect(() => {
+    if (isOpen && diagramData) {
+      console.log('🔍 Modal is open with data type:', diagramData.type);
+      if (diagramData.type === 'mermaid') {
+        console.log('📊 Rendering mermaid diagram...');
+        renderDiagram();
+      } else if (diagramData.type === 'image') {
+        console.log('🖼️ Displaying image...');
+        setIsRendering(false);
+      }
+    }
+  }, [isOpen, diagramData, renderDiagram]);
 
   const handleDownload = () => {
     if (diagramData?.type === 'image') {
@@ -138,7 +138,7 @@ export default function ArchitectureDiagramModal({ isOpen, onClose, diagramData 
                     onClick={() => setActiveTab('image')}
                     className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                       activeTab === 'image'
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30'
+                        ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30'
                         : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 hover:text-white'
                     }`}
                   >
@@ -149,7 +149,7 @@ export default function ArchitectureDiagramModal({ isOpen, onClose, diagramData 
                     onClick={() => setActiveTab('text')}
                     className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                       activeTab === 'text'
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30'
+                        ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30'
                         : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 hover:text-white'
                     }`}
                   >

@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import { GitPullRequest, AlertCircle, Tag, Star, GitFork, Eye } from 'lucide-react';
 
@@ -81,12 +82,12 @@ export default function GitHubMetrics({ stats, repoInfo }) {
             className={`${metric.bgColor} p-4 rounded-lg border border-gray-200 dark:border-gray-700 relative overflow-hidden cursor-pointer`}
           >
             {/* Background gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${metric.color} opacity-5`}></div>
+            <div className={`absolute inset-0 bg-linear-to-br ${metric.color} opacity-5`}></div>
 
             {/* Content */}
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-2">
-                <div className={`p-2 rounded-lg bg-gradient-to-br ${metric.color}`}>
+                <div className={`p-2 rounded-lg bg-linear-to-br ${metric.color}`}>
                   <metric.icon className="w-4 h-4 text-white" />
                 </div>
                 <div>

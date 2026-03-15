@@ -14,7 +14,6 @@ export default function ChatWindow({ isOpen, onClose }) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -30,7 +29,6 @@ export default function ChatWindow({ isOpen, onClose }) {
 
     const userMessage = input.trim();
     setInput('');
-    setError(null);
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
@@ -102,7 +100,7 @@ export default function ChatWindow({ isOpen, onClose }) {
           className="fixed bottom-6 right-6 z-50 w-96 glass rounded-2xl shadow-2xl border-2 border-gray-200/50 dark:border-gray-700/50 flex flex-col overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary-500 to-cyber-500 text-white">
+          <div className="flex items-center justify-between p-4 bg-brand text-white">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
               <h3 className="font-bold">Copilens AI</h3>
@@ -146,7 +144,7 @@ export default function ChatWindow({ isOpen, onClose }) {
                   <button
                     onClick={handleSend}
                     disabled={!input.trim() || isLoading}
-                    className="px-4 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl hover:shadow-lg hover:shadow-primary-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed self-end cursor-pointer hover-lift"
+                    className="px-4 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl hover:shadow-lg hover:shadow-primary-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed self-end cursor-pointer hover-lift"
                   >
                     <Send className="w-5 h-5" />
                   </button>

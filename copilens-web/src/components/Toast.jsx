@@ -47,7 +47,7 @@ export default function Toast({ message, type = 'info', recommendations = [], de
         >
           <div className="glass border-2 border-gray-200/50 dark:border-gray-700/50 rounded-xl shadow-2xl overflow-hidden">
             {/* Header */}
-            <div className={`bg-gradient-to-r ${colors[type]} p-4 flex items-center justify-between`}>
+            <div className={`bg-linear-to-r ${colors[type]} p-4 flex items-center justify-between`}>
               <div className="flex items-center gap-3">
                 <Icon className="w-6 h-6 text-white" />
                 <h3 className="text-lg font-bold text-white">
@@ -123,7 +123,7 @@ export default function Toast({ message, type = 'info', recommendations = [], de
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.5 + index * 0.1 }}
-                          className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg border border-blue-200 dark:border-blue-700"
+                          className="p-3 bg-linear-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg border border-blue-200 dark:border-blue-700"
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">

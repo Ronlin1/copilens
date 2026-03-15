@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+
 import { Rocket, Cloud, Server, Code, PlayCircle, CheckCircle, XCircle, Loader, FileText, AlertCircle, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -133,7 +134,7 @@ export default function DeployPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Header */}
@@ -152,7 +153,7 @@ export default function DeployPage() {
             <div className="mt-6">
               <button
                 onClick={() => navigate('/')}
-                className="px-6 py-3 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+                className="px-6 py-3 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
               >
                 Analyze a Repository First
               </button>
@@ -202,7 +203,7 @@ export default function DeployPage() {
                     </div>
                   )}
                   
-                  <div className={`text-4xl mb-4 text-center p-4 rounded-lg bg-gradient-to-r ${platform.color} text-white`}>
+                  <div className={`text-4xl mb-4 text-center p-4 rounded-lg bg-linear-to-r ${platform.color} text-white`}>
                     {platform.icon}
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center">
@@ -254,7 +255,7 @@ export default function DeployPage() {
                 <button
                   onClick={handleDeploy}
                   disabled={isDeploying}
-                  className="px-12 py-4 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-primary-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-3 cursor-pointer hover-lift"
+                  className="px-12 py-4 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-primary-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-3 cursor-pointer hover-lift"
                 >
                   <Rocket className="w-6 h-6" />
                   Deploy to {platforms.find(p => p.id === selectedPlatform)?.name}
@@ -283,7 +284,7 @@ export default function DeployPage() {
                         href={deploymentOptions?.[selectedPlatform]?.docsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-6 py-3 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all inline-flex items-center gap-2"
+                        className="px-6 py-3 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all inline-flex items-center gap-2"
                       >
                         <ExternalLink className="w-5 h-5" />
                         View Documentation
@@ -310,7 +311,7 @@ export default function DeployPage() {
             className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50"
           >
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500">
+              <div className="p-2 rounded-lg bg-linear-to-r from-green-500 to-emerald-500">
                 <Server className="w-5 h-5 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -354,7 +355,7 @@ export default function DeployPage() {
                   href="https://your-app.vercel.app"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all inline-flex items-center gap-2"
+                  className="px-6 py-3 bg-linear-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all inline-flex items-center gap-2"
                 >
                   <PlayCircle className="w-5 h-5" />
                   View Live Site

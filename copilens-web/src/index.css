@@ -1,6 +1,39 @@
 @import "tailwindcss";
 
-/* Base Styles */
+/* ============================================================
+   COPILENS BRAND TOKENS
+   Extracted from the hero "COPILENS" gradient:
+   C=#06b6d4 (cyan) → O=#14b8a6 (teal) → P/I=#3b82f6 (blue)
+   → L=#6366f1 (indigo) → E/N=#9333ea (purple) → S=#7c3aed (violet)
+   ============================================================ */
+:root {
+  --brand-cyan: #06b6d4;
+  --brand-teal: #14b8a6;
+  --brand-blue: #3b82f6;
+  --brand-indigo: #6366f1;
+  --brand-purple: #9333ea;
+  --brand-violet: #7c3aed;
+
+  /* Gradient shorthand */
+  --brand-gradient: linear-gradient(to right,
+      var(--brand-cyan),
+      var(--brand-teal),
+      var(--brand-blue),
+      var(--brand-purple),
+      var(--brand-violet));
+  --brand-gradient-br: linear-gradient(to bottom right,
+      var(--brand-cyan),
+      var(--brand-blue),
+      var(--brand-violet));
+
+  /* Glow colors */
+  --glow-start: rgba(6, 182, 212, 0.5);
+  --glow-end: rgba(147, 51, 234, 0.5);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
 body {
   background-color: white;
   color: #111827;
@@ -13,14 +46,44 @@ body.dark {
   color: #f3f4f6;
 }
 
-/* Utility Classes */
+/* ============================================================
+   BRAND UTILITIES
+   ============================================================ */
+
+/* The signature COPILENS text gradient */
+.text-brand {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: var(--brand-gradient);
+}
+
+/* Legacy alias used throughout the app */
 .text-gradient {
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  background-image: linear-gradient(to right, #0ea5e9, #06b6d4, #9333ea);
+  background-image: var(--brand-gradient);
 }
 
+/* Brand background gradient */
+.bg-brand {
+  background-image: var(--brand-gradient);
+}
+
+.bg-brand-br {
+  background-image: var(--brand-gradient-br);
+}
+
+/* Brand glow border */
+.glow-border {
+  border: 2px solid rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 20px var(--glow-start), 0 0 40px var(--glow-end);
+}
+
+/* ============================================================
+   GLASS
+   ============================================================ */
 .glass {
   background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(16px);
@@ -33,42 +96,48 @@ body.dark {
   border-color: rgba(55, 65, 81, 0.2);
 }
 
-.glow-border {
-  border: 2px solid rgba(14, 165, 233, 0.5);
-  box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
-}
-
-/* Cursor Styles */
-a, button, .cursor-pointer {
+/* ============================================================
+   CURSOR
+   ============================================================ */
+a,
+button,
+.cursor-pointer {
   cursor: pointer !important;
 }
 
-a:hover, button:hover {
+a:hover,
+button:hover {
   cursor: pointer !important;
 }
 
-input, textarea {
+input,
+textarea {
   cursor: text !important;
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: #9ca3af !important;
 }
 
-.dark input::placeholder, .dark textarea::placeholder {
+.dark input::placeholder,
+.dark textarea::placeholder {
   color: #6b7280 !important;
 }
 
-/* Fix input text color */
-input, textarea {
+input,
+textarea {
   color: #111827 !important;
 }
 
-.dark input, .dark textarea {
+.dark input,
+.dark textarea {
   color: #f3f4f6 !important;
 }
 
-/* Custom Scrollbar */
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -90,7 +159,9 @@ input, textarea {
   background-color: #374151;
 }
 
-/* Hover Effects */
+/* ============================================================
+   HOVER EFFECTS
+   ============================================================ */
 .hover-lift {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -101,10 +172,12 @@ input, textarea {
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
+  box-shadow: 0 0 20px var(--glow-start), 0 0 40px var(--glow-end);
 }
 
-/* Link Styles */
+/* ============================================================
+   MISC
+   ============================================================ */
 a {
   transition: color 0.2s ease, opacity 0.2s ease;
 }
@@ -113,7 +186,6 @@ a:hover {
   opacity: 0.8;
 }
 
-/* Button Styles */
 button {
   transition: all 0.2s ease;
 }

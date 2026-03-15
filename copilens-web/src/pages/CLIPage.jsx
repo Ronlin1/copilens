@@ -34,7 +34,7 @@ export default function CLIPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Header */}
@@ -62,7 +62,7 @@ export default function CLIPage() {
               className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50"
             >
               <div className="flex items-start gap-4">
-                <div className="p-3 rounded-lg bg-gradient-to-r from-primary-500 to-cyber-500">
+                <div className="p-3 rounded-lg bg-linear-to-r from-primary-500 to-cyber-500">
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
@@ -89,7 +89,7 @@ export default function CLIPage() {
           className="glass p-8 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50 mb-12"
         >
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500">
+            <div className="p-2 rounded-lg bg-linear-to-r from-purple-500 to-pink-500">
               <Terminal className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -152,7 +152,7 @@ export default function CLIPage() {
               whileHover={{ scale: 1.05 }}
               className="glass p-6 rounded-xl border-2 border-gray-200/50 dark:border-gray-700/50 text-center"
             >
-              <div className={`inline-flex p-4 rounded-full bg-gradient-to-r ${feature.color} mb-4`}>
+              <div className={`inline-flex p-4 rounded-full bg-linear-to-r ${feature.color} mb-4`}>
                 <feature.icon className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">

@@ -45,29 +45,19 @@ function LandingPage() {
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-1/4 -left-20 w-96 h-96 bg-primary-500 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/4 -left-20 w-96 h-96 bg-brand-cyan rounded-full blur-3xl opacity-30"
         />
         <motion.div
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1
-          }}
-          className="absolute bottom-1/4 -right-20 w-96 h-96 bg-cyber-500 rounded-full blur-3xl"
+          animate={{ scale: [1.2, 1, 1.2], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute bottom-1/4 -right-20 w-96 h-96 bg-brand-violet rounded-full blur-3xl opacity-30"
+        />
+        <motion.div
+          animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.3, 0.15] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-blue rounded-full blur-3xl opacity-10"
         />
       </div>
 
@@ -82,8 +72,8 @@ function LandingPage() {
           className="mb-8"
         >
           <div className="text-6xl md:text-8xl font-bold flex items-center justify-center gap-4">
-            <Zap className="w-16 h-16 md:w-20 md:h-20 text-primary-500 animate-pulse" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-500 via-cyan-500 to-purple-600">
+            <Zap className="w-16 h-16 md:w-20 md:h-20 text-brand-cyan animate-pulse" />
+            <span className="text-brand">
               COPILENS
             </span>
           </div>
@@ -106,7 +96,7 @@ function LandingPage() {
           transition={{ delay: 0.5 }}
           className="max-w-2xl mx-auto mb-16"
         >
-          <div className="bg-white/10 dark:bg-gray-900/50 backdrop-blur-lg border-2 border-primary-500/50 rounded-2xl p-2 shadow-[0_0_20px_rgba(14,165,233,0.3)] hover-glow">
+          <div className="bg-white/10 dark:bg-gray-900/50 backdrop-blur-lg border-2 border-brand-cyan/40 rounded-2xl p-2 shadow-[0_0_20px_rgba(6,182,212,0.2),0_0_40px_rgba(124,58,237,0.15)] hover-glow">
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
@@ -119,7 +109,7 @@ function LandingPage() {
               <button 
                 onClick={handleAnalyze}
                 disabled={!repoUrl.trim()}
-                className="px-8 py-4 bg-gradient-to-r from-primary-500 to-cyber-500 text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-primary-500/50 transition-all hover:scale-105 w-full sm:w-auto cursor-pointer hover-lift disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="px-8 py-4 bg-brand text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-brand-cyan/30 transition-all hover:scale-105 w-full sm:w-auto cursor-pointer hover-lift disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <Sparkles className="w-5 h-5 inline mr-2" />
                 Analyze
@@ -140,19 +130,19 @@ function LandingPage() {
               icon: Sparkles,
               title: 'AI Detection',
               description: 'Detect AI-generated code with advanced ML models',
-              gradient: 'from-purple-500 to-pink-500'
+              gradient: 'from-brand-purple to-brand-violet'
             },
             {
               icon: BarChart3,
               title: 'Deep Analytics',
               description: 'Comprehensive insights into your codebase',
-              gradient: 'from-blue-500 to-cyan-500'
+              gradient: 'from-brand-cyan to-brand-blue'
             },
             {
               icon: Rocket,
               title: 'Auto Deploy',
               description: 'Deploy to cloud platforms with one click',
-              gradient: 'from-orange-500 to-red-500'
+              gradient: 'from-brand-blue to-brand-indigo'
             }
           ].map((feature, index) => (
             <motion.div
@@ -161,9 +151,9 @@ function LandingPage() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8 + index * 0.1 }}
               whileHover={{ scale: 1.05, y: -5 }}
-              className="bg-white/10 dark:bg-gray-900/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/20 p-6 rounded-xl cursor-pointer hover:border-primary-500/50 transition-all"
+              className="bg-white/10 dark:bg-gray-900/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/20 p-6 rounded-xl cursor-pointer hover:border-brand-cyan/50 transition-all"
             >
-              <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${feature.gradient} mb-4`}>
+              <div className={`inline-flex p-3 rounded-lg bg-linear-to-r ${feature.gradient} mb-4`}>
                 <feature.icon className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -200,8 +190,8 @@ function Navigation() {
           
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <Zap className="w-6 h-6 text-primary-500" />
-            <span className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary-500 via-cyan-500 to-purple-600">
+            <Zap className="w-6 h-6 text-brand-cyan" />
+            <span className="text-xl font-black text-brand">
               COPILENS
             </span>
           </Link>
@@ -214,7 +204,7 @@ function Navigation() {
                 to={link.to}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                   location.pathname === link.to
-                    ? 'bg-gradient-to-r from-primary-500 to-cyber-500 text-white'
+                    ? 'bg-brand text-white'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-white/20 dark:hover:bg-gray-800/50'
                 }`}
               >
@@ -251,7 +241,7 @@ function Navigation() {
                     onClick={() => setIsMenuOpen(false)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                       location.pathname === link.to
-                        ? 'bg-gradient-to-r from-primary-500 to-cyber-500 text-white'
+                        ? 'bg-brand text-white'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-white/20 dark:hover:bg-gray-800/50'
                     }`}
                   >
