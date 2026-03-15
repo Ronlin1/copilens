@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Sparkles, Minimize2, Maximize2, AlertCircle } from 'lucide-react';
 import MessageList from './MessageList';
-import geminiAPI from '../../services/gemini';
+import geminiAPI from '../../services/ai';
 
 export default function ChatWindow({ isOpen, onClose }) {
   const [messages, setMessages] = useState([
