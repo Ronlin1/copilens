@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertCircle, BarChart3, Loader, Award, Rocket, FileText, Download } from 'lucide-react';
+import { AlertCircle, BarChart3, Loader, Award, Rocket, FileText, Download, Image, AlertTriangle } from 'lucide-react';
+import { ENV } from '../config/env';
 import StatsCards from '../components/Dashboard/StatsCards';
 import GitHubMetrics from '../components/Dashboard/GitHubMetrics';
 import AIDetectionChart from '../components/Dashboard/AIDetectionChart';
@@ -1000,23 +1001,39 @@ https://copilens.up.railway.app
               Deploy This Project
             </button>
 
-            <button
-              onClick={handleGenerateArchitecture}
-              disabled={generatingArchitecture}
-              className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-orange-600 to-red-600 text-white font-semibold rounded-lg hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-              {generatingArchitecture ? (
-                <>
-                  <Loader className="w-5 h-5 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <FileText size={20} />
-                  Generate Architecture
-                </>
-              )}
-            </button>
+            <div className="flex flex-col items-center gap-1">
+              <button
+                onClick={handleGenerateArchitecture}
+                disabled={generatingArchitecture}
+                className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-orange-600 to-red-600 text-white font-semibold rounded-lg hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {generatingArchitecture ? (
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" />
+                    Generating...
+                  </>
+                ) : ENV.OPENAI_API_KEY ? (
+                  <>
+                    <Image size={20} />
+                    Generate Architecture
+                  </>
+                ) : (
+                  <>
+                    <FileText size={20} />
+                    Generate Architecture
+                  </>
+                )}
+              </button>
+              <span className="text-[10px] flex items-center gap-1 font-medium">
+                {ENV.OPENAI_API_KEY ? (
+                  <span className="text-green-400">DALL-E 3 image mode</span>
+                ) : (
+                  <span className="text-yellow-400 flex items-center gap-1">
+                    <AlertTriangle size={10} /> add api key
+                  </span>
+                )}
+              </span>
+            </div>
 
             <button
               onClick={handleDownloadReport}
