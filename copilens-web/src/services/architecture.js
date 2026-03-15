@@ -286,8 +286,57 @@ Format in Markdown with clear headings. Make it professional and suitable for te
     }
   }
 
+  async _generateArchitectureImage(repoData) {
+    const name = repoData.repoInfo?.name || 'Application';
+    const description = repoData.repoInfo?.description || 'A software application';
+    const languages = Array.isArray(repoData.languages)
+      ? repoData.languages.slice(0, 4).map(l => l.name).join(', ')
+      : Object.keys(repoData.languages || {}).slice(0, 4).join(', ');
+    const fileCount = repoData.tree?.length || 0;
+
+    const prompt = `A clean, professional software architecture diagram for a project called "${name}". ${description}. Built with ${languages || 'modern web technologies'}. ${fileCount} files. Show system components as labeled boxes connected by arrows: frontend, backend, database, APIs, and external services. Use a dark background with cyan and indigo accent colors. Minimal, technical, blueprint style. No text other than component labels.`;
+
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ENV.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'dall-e-3',
+        prompt,
+        n: 1,
+        size: '1792x1024',
+        quality: 'standard',
+        response_format: 'url',
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error?.message || `OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data?.[0]?.url || null;
+  }
+
   async generateArchitectureDoc(repoData) {
-    // Groq/Llama does not support image generation — go straight to text analysis
+    // Try OpenAI DALL-E 3 for image generation first
+    if (ENV.OPENAI_API_KEY) {
+      try {
+        console.log('🎨 Generating architecture diagram image with DALL-E 3...');
+        const imageUrl = await this._generateArchitectureImage(repoData);
+        if (imageUrl) {
+          console.log('✅ Architecture diagram image generated');
+          return { textData: null, imageData: imageUrl, type: 'image' };
+        }
+      } catch (error) {
+        console.warn('⚠️ DALL-E image generation failed, falling back to text:', error.message);
+      }
+    }
+
+    // Fall back to Groq/Llama text analysis
     console.log('📝 Generating text-based architecture analysis with Llama...');
     try {
       const languages = Array.isArray(repoData.languages)

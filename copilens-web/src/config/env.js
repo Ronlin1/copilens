@@ -4,6 +4,7 @@ export const ENV = {
   APP_NAME: import.meta.env.VITE_APP_NAME || 'Copilens',
   APP_DESCRIPTION: import.meta.env.VITE_APP_DESCRIPTION || 'AI-Powered Repository Analysis',
   GROQ_API_KEY: import.meta.env.VITE_GROQ_API_KEY || '',
+  OPENAI_API_KEY: import.meta.env.VITE_OPENAI_API_KEY || '',
   IS_PRODUCTION: import.meta.env.PROD,
   IS_DEVELOPMENT: import.meta.env.DEV,
   ENABLE_CHAT: import.meta.env.VITE_ENABLE_CHAT === 'true',
