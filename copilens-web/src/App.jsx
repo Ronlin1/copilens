@@ -72,7 +72,9 @@ function LandingPage() {
           className="mb-8"
         >
           <div className="text-6xl md:text-8xl font-bold flex items-center justify-center gap-4">
-            <Zap className="w-16 h-16 md:w-20 md:h-20 text-brand-cyan animate-pulse" />
+            <div className="p-3 md:p-4 rounded-2xl bg-brand shadow-[0_0_30px_rgba(6,182,212,0.4),0_0_60px_rgba(124,58,237,0.3)]">
+              <Zap className="w-12 h-12 md:w-16 md:h-16 text-white" />
+            </div>
             <span className="text-brand">
               COPILENS
             </span>
@@ -190,7 +192,9 @@ function Navigation() {
           
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <Zap className="w-6 h-6 text-brand-cyan" />
+            <div className="p-1 rounded-lg bg-brand">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
             <span className="text-xl font-black text-brand">
               COPILENS
             </span>
