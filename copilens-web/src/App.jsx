@@ -5,6 +5,8 @@ import { Sun, Moon, Sparkles, BarChart3, Rocket, Home, Terminal, Menu, X, Zap, I
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import { ENV } from './config/env';
+import { AnimatedGridPattern } from './components/ui/AnimatedGridPattern';
+import { cn } from './utils/cn';
 
 // Lazy load pages for code splitting
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -40,26 +42,21 @@ function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden">
-      
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 -left-20 w-96 h-96 bg-brand-cyan rounded-full blur-3xl opacity-30"
-        />
-        <motion.div
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-1/4 -right-20 w-96 h-96 bg-brand-violet rounded-full blur-3xl opacity-30"
-        />
-        <motion.div
-          animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.3, 0.15] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-blue rounded-full blur-3xl opacity-10"
-        />
-      </div>
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden">
+
+      {/* Animated Grid Pattern Background */}
+      <AnimatedGridPattern
+        numSquares={30}
+        maxOpacity={0.25}
+        duration={3}
+        repeatDelay={1}
+        className={cn(
+          '[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]',
+          'inset-x-0 inset-y-[-30%] h-[200%] skew-y-12'
+        )}
+      />
+
+
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-4xl mx-auto">
@@ -72,7 +69,7 @@ function LandingPage() {
           className="mb-8"
         >
           <div className="text-6xl md:text-8xl font-bold flex items-center justify-center gap-4">
-            <div className="p-3 md:p-4 rounded-2xl bg-brand shadow-[0_0_30px_rgba(6,182,212,0.4),0_0_60px_rgba(124,58,237,0.3)]">
+            <div className="p-3 md:p-4 rounded-2xl bg-brand">
               <Zap className="w-12 h-12 md:w-16 md:h-16 text-white" />
             </div>
             <span className="text-brand">
@@ -98,7 +95,7 @@ function LandingPage() {
           transition={{ delay: 0.5 }}
           className="max-w-2xl mx-auto mb-16"
         >
-          <div className="bg-white/10 dark:bg-gray-900/50 backdrop-blur-lg border-2 border-brand-cyan/40 rounded-2xl p-2 shadow-[0_0_20px_rgba(6,182,212,0.2),0_0_40px_rgba(124,58,237,0.15)] hover-glow">
+          <div className="bg-white/10 dark:bg-gray-800/60 backdrop-blur-lg border border-gray-200/50 dark:border-gray-600/40 rounded-2xl p-2">
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
@@ -111,7 +108,7 @@ function LandingPage() {
               <button 
                 onClick={handleAnalyze}
                 disabled={!repoUrl.trim()}
-                className="px-8 py-4 bg-brand text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-brand-cyan/30 transition-all hover:scale-105 w-full sm:w-auto cursor-pointer hover-lift disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="px-8 py-4 bg-brand text-white rounded-xl font-semibold transition-all hover:scale-105 w-full sm:w-auto cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <Sparkles className="w-5 h-5 inline mr-2" />
                 Analyze
@@ -153,7 +150,7 @@ function LandingPage() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8 + index * 0.1 }}
               whileHover={{ scale: 1.05, y: -5 }}
-              className="bg-white/10 dark:bg-gray-900/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/20 p-6 rounded-xl cursor-pointer hover:border-brand-cyan/50 transition-all"
+              className="bg-white/10 dark:bg-gray-800/40 backdrop-blur-lg border border-gray-200/30 dark:border-gray-600/30 p-6 rounded-xl cursor-pointer transition-all"
             >
               <div className={`inline-flex p-3 rounded-lg bg-linear-to-r ${feature.gradient} mb-4`}>
                 <feature.icon className="w-6 h-6 text-white" />
@@ -271,7 +268,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+        <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-300">
           
           <Navigation />
           

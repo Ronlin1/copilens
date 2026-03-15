@@ -42,8 +42,8 @@ body {
 }
 
 body.dark {
-  background-color: #030712;
-  color: #f3f4f6;
+  background-color: #0f172a;
+  color: #e2e8f0;
 }
 
 /* ============================================================
@@ -75,10 +75,9 @@ body.dark {
   background-image: var(--brand-gradient-br);
 }
 
-/* Brand glow border */
+/* Brand glow border — kept for reference, not applied by default */
 .glow-border {
-  border: 2px solid rgba(6, 182, 212, 0.5);
-  box-shadow: 0 0 20px var(--glow-start), 0 0 40px var(--glow-end);
+  border: 1px solid rgba(6, 182, 212, 0.3);
 }
 
 /* ============================================================
@@ -168,11 +167,10 @@ textarea {
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 20px var(--glow-start), 0 0 40px var(--glow-end);
+  /* glow removed */
 }
 
 /* ============================================================
